@@ -3,14 +3,13 @@ package de.tobiasroeser.mill.kotlin
 import java.net.{URL, URLClassLoader}
 
 import mill.{Agg, T}
-import mill.api.{Ctx, PathRef}
+import mill.api.{Ctx, PathRef, Result}
 import mill.define.Worker
 import mill.modules.{Jvm, Util}
-import mill.scalalib.{Dep, JavaModule}
+import mill.scalalib.{Dep, DepSyntax, JavaModule, TestModule}
 import mill.scalalib.api.CompilationResult
-import mill.scalalib.DepSyntax
 
-trait KotlinModule extends JavaModule {
+trait KotlinModule extends JavaModule { outer =>
 
   /**
    * All individual source files fed into the compiler.
@@ -70,7 +69,7 @@ trait KotlinModule extends JavaModule {
 
     val worker = kotlinWorker()
 
-    worker.compile(
+    val workerResult = worker.compile(
       compileClasspath().map(_.path).toSeq,
       classes,
       allSources().map(_.path),
@@ -88,7 +87,14 @@ trait KotlinModule extends JavaModule {
     val analysisFile = dest / "analysis.dummy"
     os.write(target = analysisFile, data = "", createFolders = true)
 
-    CompilationResult(analysisFile, PathRef(classes))
+    workerResult match {
+      case Result.Success(value) => CompilationResult(analysisFile, PathRef(classes))
+      case Result.Failure(reason, value) => Result.Failure(reason, Some(CompilationResult(analysisFile, PathRef(classes))))
+      case e: Result.Exception => e
+      case Result.Aborted => Result.Aborted
+      case Result.Skipped => Result.Skipped
+//      case x => x
+    }
   }
 
   def kotlinCompilerVersion: T[String] = T {
@@ -114,5 +120,14 @@ trait KotlinModule extends JavaModule {
 //    }
 //    PathRef(kotlinHome)
 //  }
+
+  trait Tests extends super.Tests with KotlinTestModule {
+    override def kotlinVersion: T[String] = T{ outer.kotlinVersion() }
+    override def kotlinCompilerVersion: T[String] = T{ outer.kotlinCompilerVersion }
+  }
+
+}
+
+trait KotlinTestModule extends TestModule with KotlinModule {
 
 }

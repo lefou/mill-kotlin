@@ -1,6 +1,6 @@
 package de.tobiasroeser.mill.kotlin
 
-import mill.api.Ctx
+import mill.api.{Ctx, Result}
 
 trait KotlinWorker {
 
@@ -9,6 +9,6 @@ trait KotlinWorker {
     outDir: os.Path,
     sourceDirs: Seq[os.Path],
     kotlinVersion: Option[String]
-  )(implicit ctx: Ctx): Unit
+  )(implicit ctx: Ctx): Result[Unit]
 
 }

@@ -28,7 +28,6 @@ object main extends KotlinModule {
     )
   }
 
-
 }
 
 def verify(): Command[Unit] = T.command {
@@ -41,7 +40,12 @@ def verify(): Command[Unit] = T.command {
 
   main.run()()
 
-  val tr = main.test.test()()
+  val tcr = main.test.compile()
+  val testClassFiles = os.walk(tcr.classes.path).filter(os.isFile)
+  assert(testClassFiles.isEmpty === false)
 
+  val (_, tr) = main.test.test()()
+  assert(tr.size === 1)
+  assert(tr.head.status === "Success")
   ()
 }
