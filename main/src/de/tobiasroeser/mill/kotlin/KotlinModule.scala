@@ -21,7 +21,7 @@ trait KotlinModule extends JavaModule { outer =>
       root <- allSources()
       if os.exists(root.path)
       path <- (if (os.isDir(root.path)) os.walk(root.path) else Seq(root.path))
-      if os.isFile(path) && isHiddenFile(path) && ((path.ext.toLowerCase() == "kt" || path.ext.toLowerCase() == "java"))
+      if os.isFile(path) && !isHiddenFile(path) && ((path.ext.toLowerCase() == "kt" || path.ext.toLowerCase() == "java"))
     } yield PathRef(path)
   }
 
@@ -56,11 +56,14 @@ trait KotlinModule extends JavaModule { outer =>
   }
 
   override def compile: T[CompilationResult] = T {
-    kotlinCompileTask()
+    kotlinCompileTask()()
   }
 
+  def kotlincHelp(args: String*) = T.command {
+    kotlinCompileTask((Seq("-help") ++ args): _*)
+  }
 
-  protected def kotlinCompileTask = T.task {
+  protected def kotlinCompileTask(extraArgs: String*) = T.task {
     val dest = T.ctx().dest
     val classes = dest / "classes"
     os.makeDir.all(classes)
@@ -70,10 +73,13 @@ trait KotlinModule extends JavaModule { outer =>
     val worker = kotlinWorker()
 
     val workerResult = worker.compile(
-      compileClasspath().map(_.path).toSeq,
-      classes,
-      allSources().map(_.path),
-      Option(kotlinVersion()).filterNot(_.isEmpty)
+      classpath = compileClasspath().map(_.path).toSeq,
+      outDir = classes,
+      sources = allSourceFiles().map(_.path),
+      apiVersion = Option(kotlinVersion()).filterNot(_.isEmpty),
+      languageVersion = Option(kotlinVersion()).filterNot(_.isEmpty),
+      kotlincOptions = kotlincOptions() ++ extraArgs,
+//      javacOptions()
     )
 
     //    aspectjWorker().compile(
@@ -101,6 +107,7 @@ trait KotlinModule extends JavaModule { outer =>
     Versions.kotlinCompilerVersion
   }
 
+  def kotlincOptions: T[Seq[String]] = T { Seq.empty[String] }
 
 //  def kotlinCompilerHome: T[PathRef] = T.persistent {
 //    val version = kotlinCompilerVersion()
@@ -124,6 +131,7 @@ trait KotlinModule extends JavaModule { outer =>
   trait Tests extends super.Tests with KotlinTestModule {
     override def kotlinVersion: T[String] = T{ outer.kotlinVersion() }
     override def kotlinCompilerVersion: T[String] = T{ outer.kotlinCompilerVersion }
+    override def kotlincOptions: T[Seq[String]] = T{ super.kotlincOptions }
   }
 
 }

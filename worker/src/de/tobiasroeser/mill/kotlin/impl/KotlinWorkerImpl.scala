@@ -18,8 +18,11 @@ class KotlinWorkerImpl extends KotlinWorker {
   override def compile(
     classpath: Seq[os.Path],
     outDir: os.Path,
-    sourceDirs: Seq[os.Path],
-    kotlinVersion: Option[String]
+    sources: Seq[os.Path],
+    apiVersion: Option[String],
+    languageVersion: Option[String],
+    kotlincOptions: Seq[String],
+//    javacOptions: Seq[String]
   )(implicit ctx: Ctx): Result[Unit] = {
 
     val compiler = new K2JVMCompiler()
@@ -29,17 +32,18 @@ class KotlinWorkerImpl extends KotlinWorker {
     val compilerArgs: Seq[String] = Seq(
       Seq("-d", outDir.toIO.getAbsolutePath()),
       addNonEmpty[os.Path]("-classpath", classpath, _.toIO.getAbsolutePath()),
-      addNonEmpty[String]("-api-version", kotlinVersion.toSeq,   _.split("[.]", 3).take(2).mkString(".")),
+      addNonEmpty[String]("-api-version", apiVersion.toSeq,   _.split("[.]", 3).take(2).mkString(".")),
+      addNonEmpty[String]("-language-version", languageVersion.toSeq,   _.split("[.]", 3).take(2).mkString(".")),
+      kotlincOptions,
       // parameters
-      sourceDirs.map(_.toIO.getAbsolutePath())
+      sources.map(_.toIO.getAbsolutePath())
     ).flatten
 
     ctx.log.debug("Using compiler arguments: " + compilerArgs.map(v => s"'${v}'").mkString(" "))
 
-
     val exitCode = compiler.exec(ctx.log.errorStream, compilerArgs.toArray[String]: _*)
     if(exitCode.getCode() != 0) {
-      Result.Failure(s"Kotlin compiler failed with exit code ${exitCode}")
+      Result.Failure(s"Kotlin compiler failed with exit code ${exitCode.getCode()} (${exitCode})")
     } else {
       Result.Success()
     }
