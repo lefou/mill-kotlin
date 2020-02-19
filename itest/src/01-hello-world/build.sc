@@ -17,6 +17,8 @@ object main extends KotlinModule {
     ivy"org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion()}"
   )}
 
+  def mainClass = Some("hello.HelloKt")
+
   object test extends Tests {
     def testFrameworks = Seq("com.novocode.junit.JUnitFramework")
     def ivyDeps = Agg(
@@ -37,7 +39,10 @@ def verify(): Command[Unit] = T.command {
   val classFiles = os.walk(cr.classes.path).filter(os.isFile)
   assert(classFiles.isEmpty === false)
 
+  main.run()()
+
   val tr = main.test.test()()
+  tr.
 
   ()
 }
