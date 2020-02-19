@@ -70,19 +70,11 @@ trait KotlinModule extends JavaModule {
 
     val worker = kotlinWorker()
 
-    import scala.collection.JavaConverters._
-
-    val log = new Log {
-      override def info(msg: String): Unit = T.ctx().log.info(msg)
-      override def error(msg: String): Unit = T.ctx().log.error(msg)
-      override def debug(msg: String): Unit = T.ctx().log.debug(msg)
-    }
-
     worker.compile(
-      compileClasspath().map(_.path.toIO).toSeq.asJava,
-      classes.toIO,
-      allSources().map(_.path.toIO).asJava,
-      log
+      compileClasspath().map(_.path).toSeq,
+      classes,
+      allSources().map(_.path),
+      Option(kotlinVersion()).filterNot(_.isEmpty)
     )
 
     //    aspectjWorker().compile(

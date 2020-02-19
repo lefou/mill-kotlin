@@ -14,14 +14,18 @@ object Deps {
 
   val kotlinCompiler = ivy"org.jetbrains.kotlin:kotlin-compiler:${kotlinVersion}"
   val logbackClassic = ivy"ch.qos.logback:logback-classic:1.1.3"
+  val millMainApi = ivy"com.lihaoyi::mill-main-api:${millVersion}"
   val millMain = ivy"com.lihaoyi::mill-main:${millVersion}"
   val millScalalib = ivy"com.lihaoyi::mill-scalalib:${millVersion}"
+  val osLib = ivy"com.lihaoyi::os-lib:0.6.2"
   val scalaTest = ivy"org.scalatest::scalatest:3.0.8"
   val slf4j = ivy"org.slf4j:slf4j-api:1.7.25"
   val utilsFunctional = ivy"de.tototec:de.tototec.utils.functional:2.0.1"
 }
 
-trait MillKotlinModule extends JavaModule with PublishModule {
+trait MillKotlinModule extends ScalaModule with PublishModule {
+
+  def scalaVersion = T { Deps.scalaVersion }
 
   def publishVersion = GitSupport.publishVersion()._2
 
@@ -42,6 +46,10 @@ trait MillKotlinModule extends JavaModule with PublishModule {
 
 object api extends MillKotlinModule {
   override def artifactName = T { "de.tobiasroeser.mill.kotlin-api" }
+  override def compileIvyDeps: T[Loose.Agg[Dep]] = T{ Agg(
+    Deps.millMainApi,
+    Deps.osLib
+  )}
 
 }
 
@@ -51,7 +59,9 @@ object worker extends MillKotlinModule {
   override def moduleDeps: Seq[PublishModule] = Seq(api)
 
   override def ivyDeps: T[Loose.Agg[Dep]] = T{ Agg(
-    Deps.utilsFunctional
+//    Deps.utilsFunctional
+    Deps.osLib,
+    Deps.millMainApi
   )}
 
   override def compileIvyDeps: T[Loose.Agg[Dep]] = T{ Agg(
@@ -61,8 +71,6 @@ object worker extends MillKotlinModule {
 }
 
 object main extends MillKotlinModule with ScalaModule {
-
-  def scalaVersion = T { Deps.scalaVersion }
 
   override def moduleDeps: Seq[PublishModule] = Seq(api)
 
