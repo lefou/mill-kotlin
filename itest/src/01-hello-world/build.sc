@@ -42,7 +42,6 @@ def verify(): Command[Unit] = T.command {
   main.run()()
 
   val tr = main.test.test()()
-  tr.
 
   ()
 }
