@@ -1,5 +1,76 @@
 = mill-kotlin - Kotlin compiler support for mill
 :version: 0.0.1-SNAPSHOT
+:kotlinVersion: 1.3.61
 :mill-version: 0.5.7
 :toc:
 :toc-placement: preamble
+
+ifdef::env-github[]
+image:https://travis-ci.org/lefou/mill-kotlin.svg?branch=master["Build Status", link="https://travis-ci.org/lefou/mill-kotlin"]
+endif::[]
+
+Documentation for mill-kotlin, a mill plugin to support the https://kotlinlang.org/[Kotlin language and compiler].
+
+== Quickstart
+
+Mill version {mill-version} or newer is required.
+
+[source,scala,subs="attributes,verbatim"]
+----
+import mill._
+import mill.scalalib._
+import mill.define._
+
+// Load the plugin from Maven Central via ivy/coursier
+import $ivy.`de.tototec::de.tobiasroeser.mill.kotlin:{version}`, de.tobiasroeser.mill.kotlin._
+
+object main extends KotlinModule {
+
+  // Select the Kotlin version
+  def kotlinVersion = T{ "{kotlinVersion}" }
+
+  // Set additional Kotlin compiler options, e.g. the language level and annotation processor
+  // Run `mill main.kotlincHelp` to get a list of supported options
+  def kotlincOptions = Seq("-verbose")
+
+}
+----
+
+== Configuration
+
+Your module needs to extend `de.tobiasroeser.mill.kotlin.KotlinModule` which itself extends `mill.scalalib.JavaModule`.
+
+The module trait `de.tobiasroeser.mill.kotlin.KotlinModule` has the following configuration options (over those from `mill.scalalib.JavaModule`).
+
+
+== License
+
+Apache License, version 2
+
+== Supporters
+
+Thanks to https://iba-cg.de/[iba Consulting Gesellschaft mbH & Co KG] for the initial development support.
+
+== Version Compatibility Matrix
+
+Mill is still in active development, and has no stable API yet.
+Hence, not all mill-kotlin versions work with every mill version.
+
+The following table shows a matrix of compatible mill and mill-kotlin versions.
+
+.Version Compatibility Matrix
+[options="header"]
+|===
+| mill-kotlin | mill
+| <master> | 0.5.7
+|===
+
+== Changelog
+
+=== mill-kotlin {master}
+:prev-version:
+:version:
+:github-milestone:
+
+//_See https://github.com/lefou/mill-kotlin/milestone/{github-milestone}?closed=1[milstone {version}]
+//and the https://github.com/lefou/mill-kotlin/compare/{prev-version}...{version}[list of commits]_
