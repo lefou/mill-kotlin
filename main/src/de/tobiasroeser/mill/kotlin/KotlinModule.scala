@@ -5,7 +5,7 @@ import java.net.{URL, URLClassLoader}
 
 import mill.{Agg, T}
 import mill.api.{Ctx, PathRef, Result}
-import mill.define.{Task, Worker}
+import mill.define.{Command, Task, Worker}
 import mill.modules.{Jvm, Util}
 import mill.scalalib.{Dep, DepSyntax, JavaModule, TestModule}
 import mill.scalalib.api.CompilationResult
