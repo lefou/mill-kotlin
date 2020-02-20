@@ -215,3 +215,14 @@ def release(
     main.publish(sonatypeCreds = sonatypeCreds, release = release, readTimeout = 600000)()
   }
 }
+
+/**
+ * Update the millw script.
+ */
+def millw() = T.command {
+  val target = mill.modules.Util.download("https://raw.githubusercontent.com/lefou/millw/master/millw")
+  val millw = build.millSourcePath / "millw"
+  os.copy.over(target.path, millw)
+  os.perms.set(millw, os.perms(millw) + java.nio.file.attribute.PosixFilePermission.OWNER_EXECUTE)
+  target
+}
