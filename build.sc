@@ -1,10 +1,11 @@
 import mill._
-import mill.define.{Module, Target, TaskModule}
+import mill.define.{Module, Target}
 import mill.scalalib._
 import mill.scalalib.publish._
 import $ivy.`de.tototec::de.tobiasroeser.mill.integrationtest:0.1.2`
 import de.tobiasroeser.mill.integrationtest._
 import mill.api.Loose
+import mill.main.Tasks
 
 
 object Deps {
@@ -135,8 +136,6 @@ object itest extends MillIntegrationTestModule {
 
 }
 
-import mill.define.Sources
-
 object GitSupport extends Module {
 
   /**
@@ -199,7 +198,7 @@ def install() = T.command {
 def checkRelease: T[Boolean] = T.input {
   if (GitSupport.publishVersion()._2.contains("DIRTY")) {
     T.ctx().log.error("Project (git) state is dirty. Release not recommended!")
-    false
+    mill.api.Result.Failure("Project (git) state is dirty. Release not recommended!", Some(false))
   } else { true }
 }
 
@@ -208,12 +207,20 @@ def release(
              sonatypeCreds: String,
              release: Boolean = true
            ) = T.command {
-  if (checkRelease()) {
+  if(checkRelease()) {
     test()()
-    api.publish(sonatypeCreds = sonatypeCreds, release = release, readTimeout = 600000)()
-    worker.publish(sonatypeCreds = sonatypeCreds, release = release, readTimeout = 600000)()
-    main.publish(sonatypeCreds = sonatypeCreds, release = release, readTimeout = 600000)()
+    PublishModule.publishAll(
+      sonatypeCreds = sonatypeCreds,
+      release = release,
+      publishArtifacts = Tasks(Seq(
+        api.publishArtifacts,
+        worker.publishArtifacts,
+        main.publishArtifacts
+      )),
+      readTimeout = 600000
+    )
   }
+  ()
 }
 
 /**
