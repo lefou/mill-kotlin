@@ -103,7 +103,7 @@ trait KotlinModule extends JavaModule { outer =>
    * Runs the Kotlin compiler with the `-help` argument to show you the built-in cmdline help.
    * You might want to add additional arguments like `-X` to see extra help.
    */
-  def kotlincHelp(args: String*) = T.command {
+  def kotlincHelp(args: String*): Command[Unit] = T.command {
     kotlinCompileTask(Seq("-help") ++ args)
     ()
   }
