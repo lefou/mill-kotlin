@@ -26,16 +26,39 @@ trait KotlinModule extends JavaModule { outer =>
     } yield PathRef(path)
   }
 
+  /**
+   * All individual Java source files fed into the compiler.
+   * Subset of [[allSourceFiles]].
+   */
   def allJavaSourceFiles = T {
     allSourceFiles().filter(_.path.ext.toLowerCase() == "java")
   }
 
+  /**
+   * All individual Kotlin source files fed into the compiler.
+   * Subset of [[allSourceFiles]].
+   */
   def allKotlinSourceFiles = T {
     allSourceFiles().filter(path => Seq("kt", "kts").exists(path.path.ext.toLowerCase() == _))
   }
 
+  /**
+   * The Kotlin version to be used (for API and Language level settings).
+   */
   def kotlinVersion: T[String]
 
+  /**
+   * The version of the Kotlin compiler to be used.
+   * Default is derived from [[kotlinVersion]].
+   */
+  def kotlinCompilerVersion: T[String] = T {
+    Versions.kotlinCompilerVersion
+  }
+
+  /**
+   * The Ivy/Coursier dependencies resembling the Kotlin compiler.
+   * Default is derived from [[kotlinCompilerVersion]].
+   */
   def kotlinCompilerIvyDeps: T[Agg[Dep]] = T{ Agg(
     ivy"org.jetbrains.kotlin:kotlin-compiler:${kotlinCompilerVersion()}",
     ivy"org.jetbrains.kotlin:kotlin-scripting-compiler:${kotlinCompilerVersion()}",
@@ -44,6 +67,11 @@ trait KotlinModule extends JavaModule { outer =>
     ivy"${Versions.millKotlinWorkerImplIvyDep}"
   )}
 
+
+  /**
+   * The Java classpath resembling the Kotlin compiler.
+   * Default is derived from [[kotlinCompilerIvyDeps]].
+   */
   def kotlinCompilerClasspath: T[Seq[PathRef]] = T {
     resolveDeps(kotlinCompilerIvyDeps)().toSeq
   }
@@ -64,25 +92,25 @@ trait KotlinModule extends JavaModule { outer =>
     worker
   }
 
+  /**
+   * Compiles all the sources to JVM class files.
+   */
   override def compile: T[CompilationResult] = T {
     kotlinCompileTask()()
   }
 
+  /**
+   * Runs the Kotlin compiler with the `-help` argument to show you the built-in cmdline help.
+   * You might want to add additional arguments like `-X` to see extra help.
+   */
   def kotlincHelp(args: String*) = T.command {
     kotlinCompileTask(Seq("-help") ++ args)
     ()
   }
 
-  protected def javaCompileTask(kotlinCompilationResult: Option[CompilationResult]): Task[CompilationResult] = T.task {
-    zincWorker.worker().compileJava(
-      upstreamCompileOutput(),
-      allJavaSourceFiles().map(_.path),
-      compileClasspath().map(_.path),
-      javacOptions(),
-      T.ctx().reporter(hashCode)
-    )
-  }
-
+  /**
+   * The actual Kotlin compile task (used by [[compile]] and [[kotlincHelp()]].
+   */
   protected def kotlinCompileTask(extraKotlinArgs: Seq[String] = Seq()): Task[CompilationResult] = T.task {
     val ctx = T.ctx()
     val dest = ctx.dest
@@ -133,8 +161,14 @@ trait KotlinModule extends JavaModule { outer =>
       workerResult match {
         case Result.Success(value) =>
           val cr = CompilationResult(analysisFile, PathRef(classes))
-          if (!isJava) cr
-          else compileJava
+          if (!isJava) {
+            // pure Kotlin project
+            cr
+          }
+          else {
+            // also run Java compiler
+            compileJava
+          }
         case Result.Failure(reason, value) => Result.Failure(reason, Some(CompilationResult(analysisFile, PathRef(classes))))
         case e: Result.Exception => e
         case Result.Aborted => Result.Aborted
@@ -147,31 +181,14 @@ trait KotlinModule extends JavaModule { outer =>
     }
   }
 
-  def kotlinCompilerVersion: T[String] = T {
-    Versions.kotlinCompilerVersion
-  }
-
+  /**
+   * Additional Kotlin compiler options to be use by [[compile]].
+   */
   def kotlincOptions: T[Seq[String]] = T { Seq.empty[String] }
 
-//  def kotlinCompilerHome: T[PathRef] = T.persistent {
-//    val version = kotlinCompilerVersion()
-//    if (version.isEmpty()) sys.error("Undefined kotlinCompilerVersion")
-//
-//    val path = T.ctx().dest / version / "kotlinc"
-//    val kotlinHome = if (os.isFile(path / "bin" / "kotlinc")) {
-//      path
-//    }
-//    else {
-//      val unpacked = Util.downloadUnpackZip(
-//        url = s"https://github.com/JetBrains/kotlin/releases/download/v${version}/kotlin-compiler-${version}.zip",
-//        dest = os.rel / version
-//      )
-//
-//      unpacked.path / "kotlinc"
-//    }
-//    PathRef(kotlinHome)
-//  }
-
+  /**
+   * A test sub-module linked to its parent module best suited for unit-tests.
+   */
   trait Tests extends super.Tests with KotlinTestModule {
     override def kotlinVersion: T[String] = T{ outer.kotlinVersion() }
     override def kotlinCompilerVersion: T[String] = T{ outer.kotlinCompilerVersion }
@@ -180,6 +197,9 @@ trait KotlinModule extends JavaModule { outer =>
 
 }
 
+/**
+ * A [[TestModule]] with support for the Kotlin compiler.
+ * @see [[KotlinModule]] for details.
+ */
 trait KotlinTestModule extends TestModule with KotlinModule {
-
 }

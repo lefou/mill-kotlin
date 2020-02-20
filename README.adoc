@@ -38,10 +38,41 @@ object main extends KotlinModule {
 
 == Configuration
 
-Your module needs to extend `de.tobiasroeser.mill.kotlin.KotlinModule` which itself extends `mill.scalalib.JavaModule`.
+To target the JVM (kotlin-jvm), our module needs to extend `de.tobiasroeser.mill.kotlin.KotlinModule` which itself extends `mill.scalalib.JavaModule`.
+
+For convenience, you may derive your unit test projects from `de.tobiasroeser.mill.kotlin.KotlinModule.Tests` trait.
 
 The module trait `de.tobiasroeser.mill.kotlin.KotlinModule` has the following configuration options (over those from `mill.scalalib.JavaModule`).
 
+`def kotlinVersion: T[String]`::
+  The Kotlin version to be used (for API and Language level settings).
+
+`def kotlinCompilerVersion: T[String]`:: The version of the Kotlin compiler to be used.
+  Default is derived from [[kotlinVersion]].
+
+`def compile: T[CompilationResult]`::
+  Compiles all the sources to JVM class files.
+
+`def kotlincOptions: T[Seq[String]]`::
+  Additional Kotlin compiler options to be use by `compile`.
+
+`def ivyDeps: T[Agg[Dep]]`::
+  The compile and runtime dependencies.
+
+`def kotlincHelp(args: String*)`::
+  Runs the Kotlin compiler with the `-help` argument to show you the built-in cmdline help.
+  You might want to add additional arguments like `-X` to see extra help.
+
+`def kotlinCompilerIvyDeps: T[Agg[Dep]]`::
+  The Ivy/Coursier dependencies resembling the Kotlin compiler.
+  Default is derived from `kotlinCompilerVersion`.
+
+`def kotlinCompilerClasspath: T[Seq[PathRef]]`::
+  The Java classpath resembling the Kotlin compiler.
+  Default is derived from [[kotlinCompilerIvyDeps]].
+
+`trait Tests extends TestModule with KotlinTestModule`::
+  A test sub-module linked to its parent module best suited for unit-tests.
 
 == License
 
