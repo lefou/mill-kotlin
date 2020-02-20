@@ -15,47 +15,18 @@ import scala.collection.JavaConverters._
 
 class KotlinWorkerImpl extends KotlinWorker {
 
-  override def compile(
-    classpath: Seq[os.Path],
-    outDir: os.Path,
-    sources: Seq[os.Path],
-    apiVersion: Option[String],
-    languageVersion: Option[String],
-    kotlincOptions: Seq[String],
-//    javacOptions: Seq[String]
-  )(implicit ctx: Ctx): Result[Unit] = {
+  def compile(args: String*)(implicit ctx: Ctx): Result[Unit] = {
+    ctx.log.debug("Using compiler arguments: " + args.map(v => s"'${v}'").mkString(" "))
 
     val compiler = new K2JVMCompiler()
-
-    classOf[K2JVMCompilerArguments]
-
-    val compilerArgs: Seq[String] = Seq(
-      Seq("-d", outDir.toIO.getAbsolutePath()),
-      addNonEmpty[os.Path]("-classpath", classpath, _.toIO.getAbsolutePath()),
-      addNonEmpty[String]("-api-version", apiVersion.toSeq,   _.split("[.]", 3).take(2).mkString(".")),
-      addNonEmpty[String]("-language-version", languageVersion.toSeq,   _.split("[.]", 3).take(2).mkString(".")),
-      kotlincOptions,
-      // parameters
-      sources.map(_.toIO.getAbsolutePath())
-    ).flatten
-
-    ctx.log.debug("Using compiler arguments: " + compilerArgs.map(v => s"'${v}'").mkString(" "))
-
-    val exitCode = compiler.exec(ctx.log.errorStream, compilerArgs.toArray[String]: _*)
+    val exitCode = compiler.exec(ctx.log.errorStream, args: _*)
     if(exitCode.getCode() != 0) {
       Result.Failure(s"Kotlin compiler failed with exit code ${exitCode.getCode()} (${exitCode})")
     } else {
       Result.Success()
     }
-
   }
 
-  def addNonEmpty[T](arg: String, seq: Seq[T], render: T => String, sep: String = File.pathSeparator): Seq[String] = {
-    if (seq.isEmpty) {
-      Seq()
-    } else {
-      Seq(arg, seq.map(render).mkString(sep))
-    }
-  }
+
 
 }

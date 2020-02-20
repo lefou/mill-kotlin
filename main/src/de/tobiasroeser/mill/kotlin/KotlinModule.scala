@@ -1,10 +1,11 @@
 package de.tobiasroeser.mill.kotlin
 
+import java.io.File
 import java.net.{URL, URLClassLoader}
 
 import mill.{Agg, T}
 import mill.api.{Ctx, PathRef, Result}
-import mill.define.Worker
+import mill.define.{Task, Worker}
 import mill.modules.{Jvm, Util}
 import mill.scalalib.{Dep, DepSyntax, JavaModule, TestModule}
 import mill.scalalib.api.CompilationResult
@@ -21,15 +22,23 @@ trait KotlinModule extends JavaModule { outer =>
       root <- allSources()
       if os.exists(root.path)
       path <- (if (os.isDir(root.path)) os.walk(root.path) else Seq(root.path))
-      if os.isFile(path) && !isHiddenFile(path) && ((path.ext.toLowerCase() == "kt" || path.ext.toLowerCase() == "java"))
+      if os.isFile(path) && !isHiddenFile(path) && Seq("kt", "kts", "java").exists(path.ext.toLowerCase() == _)
     } yield PathRef(path)
+  }
+
+  def allJavaSourceFiles = T {
+    allSourceFiles().filter(_.path.ext.toLowerCase() == "java")
+  }
+
+  def allKotlinSourceFiles = T {
+    allSourceFiles().filter(path => Seq("kt", "kts").exists(path.path.ext.toLowerCase() == _))
   }
 
   def kotlinVersion: T[String]
 
   def kotlinCompilerIvyDeps: T[Agg[Dep]] = T{ Agg(
     ivy"org.jetbrains.kotlin:kotlin-compiler:${kotlinCompilerVersion()}",
-//    ivy"org.jetbrains.kotlin:kotlin-scripting-compiler:${kotlinCompilerVersion()}",
+    ivy"org.jetbrains.kotlin:kotlin-scripting-compiler:${kotlinCompilerVersion()}",
 //    ivy"org.jetbrains.kotlin:kotlin-scripting-compiler-impl:${kotlinCompilerVersion()}",
 //    ivy"org.jetbrains.kotlin:kotlin-scripting-common:${kotlinCompilerVersion()}",
     ivy"${Versions.millKotlinWorkerImplIvyDep}"
@@ -60,46 +69,81 @@ trait KotlinModule extends JavaModule { outer =>
   }
 
   def kotlincHelp(args: String*) = T.command {
-    kotlinCompileTask((Seq("-help") ++ args): _*)
+    kotlinCompileTask(Seq("-help") ++ args)
+    ()
   }
 
-  protected def kotlinCompileTask(extraArgs: String*) = T.task {
-    val dest = T.ctx().dest
+  protected def javaCompileTask(kotlinCompilationResult: Option[CompilationResult]): Task[CompilationResult] = T.task {
+    zincWorker.worker().compileJava(
+      upstreamCompileOutput(),
+      allJavaSourceFiles().map(_.path),
+      compileClasspath().map(_.path),
+      javacOptions(),
+      T.ctx().reporter(hashCode)
+    )
+  }
+
+  protected def kotlinCompileTask(extraKotlinArgs: Seq[String] = Seq()): Task[CompilationResult] = T.task {
+    val ctx = T.ctx()
+    val dest = ctx.dest
     val classes = dest / "classes"
     os.makeDir.all(classes)
 
-//    val kotlinHome = kotlinCompilerHome().path
+    val isKotlin = !allKotlinSourceFiles().isEmpty
+    val isJava = !allJavaSourceFiles().isEmpty
+    val isMixed = isKotlin && isJava
 
-    val worker = kotlinWorker()
+    val counts = Seq("Kotlin" -> allKotlinSourceFiles().size, "Java" -> allJavaSourceFiles().size)
+    ctx.log.info(s"Compiling ${counts.filter(_._2 > 0).map{ case (n,c) => s"$c $n" }.mkString(" and ")} sources to ${classes} ...")
 
-    val workerResult = worker.compile(
-      classpath = compileClasspath().map(_.path).toSeq,
-      outDir = classes,
-      sources = allSourceFiles().map(_.path),
-      apiVersion = Option(kotlinVersion()).filterNot(_.isEmpty),
-      languageVersion = Option(kotlinVersion()).filterNot(_.isEmpty),
-      kotlincOptions = kotlincOptions() ++ extraArgs,
-//      javacOptions()
-    )
+    def compileJava = {
+      zincWorker.worker().compileJava(
+        upstreamCompileOutput(),
+        allJavaSourceFiles().map(_.path),
+        compileClasspath().map(_.path),
+        javacOptions(),
+        ctx.reporter(hashCode)
+      )
+    }
 
-    //    aspectjWorker().compile(
-    //      classpath = compileClasspath().toSeq.map(_.path),
-    //      sourceDirs = allSources().map(_.path),
-    //      options = ajcOptions(),
-    //      aspectPath = effectiveAspectPath().toSeq.map(_.path),
-    //      inPath = weavePath().map(_.path)
-    //    )(T.ctx())
+    if(isMixed || isKotlin) {
+      val compilerArgs: Seq[String] = Seq(
+        // destdir
+        Seq("-d", classes.toIO.getAbsolutePath()),
+        // classpath
+        if (compileClasspath().isEmpty) Seq() else Seq(
+          "-classpath",
+          compileClasspath().toSeq
+            .map(_.path.toIO.getAbsolutePath())
+            .mkString(File.pathSeparator)
+        ),
+        Seq("-api-version", kotlinVersion().split("[.]", 3).take(2).mkString(".")),
+        Seq("-language-version", kotlinVersion().split("[.]", 3).take(2).mkString(".")),
+        kotlincOptions(),
+        extraKotlinArgs,
+        // parameters
+        allSourceFiles().map(_.path.toIO.getAbsolutePath())
+      ).flatten
 
-    val analysisFile = dest / "analysis.dummy"
-    os.write(target = analysisFile, data = "", createFolders = true)
+      val workerResult = kotlinWorker().compile(compilerArgs: _*)
 
-    workerResult match {
-      case Result.Success(value) => CompilationResult(analysisFile, PathRef(classes))
-      case Result.Failure(reason, value) => Result.Failure(reason, Some(CompilationResult(analysisFile, PathRef(classes))))
-      case e: Result.Exception => e
-      case Result.Aborted => Result.Aborted
-      case Result.Skipped => Result.Skipped
-//      case x => x
+      val analysisFile = dest / "kotlin.analysis.dummy"
+      os.write(target = analysisFile, data = "", createFolders = true)
+
+      workerResult match {
+        case Result.Success(value) =>
+          val cr = CompilationResult(analysisFile, PathRef(classes))
+          if (!isJava) cr
+          else compileJava
+        case Result.Failure(reason, value) => Result.Failure(reason, Some(CompilationResult(analysisFile, PathRef(classes))))
+        case e: Result.Exception => e
+        case Result.Aborted => Result.Aborted
+        case Result.Skipped => Result.Skipped
+        //      case x => x
+      }
+    } else {
+      // it's Java only
+      compileJava
     }
   }
 
