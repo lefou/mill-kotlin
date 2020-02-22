@@ -49,7 +49,7 @@ The module trait `de.tobiasroeser.mill.kotlin.KotlinModule` has the following co
   The Kotlin version to be used (for API and Language level settings).
 
 `def kotlinCompilerVersion: T[String]`:: The version of the Kotlin compiler to be used.
-  Default is derived from [[kotlinVersion]].
+  Default is derived from `kotlinVersion`.
 
 `def compile: T[CompilationResult]`::
   Compiles all the sources to JVM class files.
@@ -70,7 +70,7 @@ The module trait `de.tobiasroeser.mill.kotlin.KotlinModule` has the following co
 
 `def kotlinCompilerClasspath: T[Seq[PathRef]]`::
   The Java classpath resembling the Kotlin compiler.
-  Default is derived from [[kotlinCompilerIvyDeps]].
+  Default is derived from `kotlinCompilerIvyDeps`.
 
 `trait Tests extends TestModule with KotlinTestModule`::
   A test sub-module linked to its parent module best suited for unit-tests.
