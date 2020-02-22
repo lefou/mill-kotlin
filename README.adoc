@@ -86,7 +86,7 @@ The following table shows a matrix of compatible mill and mill-kotlin versions.
 [options="header"]
 |===
 | mill-kotlin | mill
-| <master> | 0.5.7
+| 0.0.1 | 0.5.7
 |===
 
 == Download
