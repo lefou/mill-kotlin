@@ -51,36 +51,24 @@ object api extends MillKotlinModule {
     Deps.millMainApi,
     Deps.osLib
   )}
-
 }
 
 object worker extends MillKotlinModule {
   override def artifactName = T { "de.tobiasroeser.mill.kotlin-worker" }
-
   override def moduleDeps: Seq[PublishModule] = Seq(api)
-
-  override def ivyDeps: T[Loose.Agg[Dep]] = T{ Agg(
-//    Deps.utilsFunctional
-    Deps.osLib,
-    Deps.millMainApi
-  )}
-
   override def compileIvyDeps: T[Loose.Agg[Dep]] = T{ Agg(
+    Deps.osLib,
+    Deps.millMainApi,
     Deps.kotlinCompiler
   )}
-
 }
 
 object main extends MillKotlinModule with ScalaModule {
-
+  override def artifactName = T { "de.tobiasroeser.mill.kotlin" }
   override def moduleDeps: Seq[PublishModule] = Seq(api)
-
   override def ivyDeps = T {
     Agg(ivy"${scalaOrganization()}:scala-library:${scalaVersion()}")
   }
-
-  override def artifactName = T { "de.tobiasroeser.mill.kotlin" }
-
   override def compileIvyDeps = Agg(
     Deps.millMain,
     Deps.millScalalib
@@ -197,7 +185,6 @@ def install() = T.command {
 
 def checkRelease: T[Boolean] = T.input {
   if (GitSupport.publishVersion()._2.contains("DIRTY")) {
-    T.ctx().log.error("Project (git) state is dirty. Release not recommended!")
     mill.api.Result.Failure("Project (git) state is dirty. Release not recommended!", Some(false))
   } else { true }
 }
