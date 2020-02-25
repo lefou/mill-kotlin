@@ -124,7 +124,7 @@ Contributing::
 == Changelog
 
 === mill-kotlin 0.0.2 - 2020-02-25
-:prev-version:0.0.1
+:prev-version: 0.0.1
 :version: 0.0.2
 :github-milestone:1
 
