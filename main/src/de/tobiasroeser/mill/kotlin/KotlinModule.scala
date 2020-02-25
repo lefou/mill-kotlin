@@ -104,7 +104,7 @@ trait KotlinModule extends JavaModule { outer =>
    * You might want to add additional arguments like `-X` to see extra help.
    */
   def kotlincHelp(args: String*): Command[Unit] = T.command {
-    kotlinCompileTask(Seq("-help") ++ args)
+    kotlinCompileTask(Seq("-help") ++ args)()
     ()
   }
 
