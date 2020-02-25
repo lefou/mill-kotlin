@@ -114,7 +114,7 @@ object itest extends MillIntegrationTestModule {
 
   def millTestVersion = T {
     val ctx = T.ctx()
-    ctx.env.get("TEST_MILL_VERSION").getOrElse(Deps.millVersion)
+    ctx.env.get("TEST_MILL_VERSION").filterNot(_.isEmpty).getOrElse(Deps.millVersion)
   }
 
   def pluginsUnderTest = Seq(main)

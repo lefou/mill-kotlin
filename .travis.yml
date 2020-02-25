@@ -5,5 +5,9 @@ jdk:
   - openjdk8
   - openjdk11
 
+env:
+  - TEST_MILL_VERSION=
+  - TEST_MILL_VERSION=0.5.7
+
 script:
   - ./millw test

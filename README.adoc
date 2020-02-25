@@ -1,5 +1,5 @@
 = mill-kotlin - Kotlin compiler support for mill
-:version: 0.0.1
+:version: 0.0.2
 :kotlinVersion: 1.3.61
 :projectHome: https://github.com/lefou/mill-kotlin
 :mill-version: 0.5.7
@@ -122,6 +122,16 @@ Contributing::
   I also accept {projectHome}/pulls[pull requests on GitHub].
 
 == Changelog
+
+=== mill-kotlin 0.0.2 - 2020-02-25
+:prev-version:0.0.1
+:version: 0.0.2
+:github-milestone:1
+
+* Fixed non-functional `kotlincHelp` target
+
+_See https://github.com/lefou/mill-kotlin/milestone/{github-milestone}?closed=1[milstone {version}]
+and the https://github.com/lefou/mill-kotlin/compare/{prev-version}...{version}[list of commits]_
 
 === mill-kotlin 0.0.1 - 2020-02-20
 :prev-version:
