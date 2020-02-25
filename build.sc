@@ -205,7 +205,7 @@ def release(
         main.publishArtifacts
       )),
       readTimeout = 600000
-    )
+    )()
   }
   ()
 }
