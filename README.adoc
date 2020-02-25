@@ -126,7 +126,7 @@ Contributing::
 == Changelog
 
 === master
-:version: master
+:version: 0.0.3
 :prev-version: 0.0.2
 :github-milestone:
 
