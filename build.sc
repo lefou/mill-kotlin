@@ -10,7 +10,7 @@ import mill.main.Tasks
 
 object Deps {
   def kotlinVersion = "1.3.61"
-  def millVersion = "0.5.7"
+  def millVersion = "0.6.0"
   def scalaVersion = "2.12.10"
 
   val kotlinCompiler = ivy"org.jetbrains.kotlin:kotlin-compiler:${kotlinVersion}"
