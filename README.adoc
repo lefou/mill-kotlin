@@ -128,11 +128,12 @@ Contributing::
 === master
 :version: master
 :prev-version: 0.0.2
+:github-milestone:
 
 * Updated Mill API to 0.6.0
 
 _See
-ifdef::github-milestone[]
+ifeval::["{github-milestone}" != ""]
 https://github.com/lefou/mill-kotlin/milestone/{github-milestone}?closed=1[milstone {version}]
 and the
 endif::[]
@@ -146,17 +147,22 @@ https://github.com/lefou/mill-kotlin/compare/{prev-version}...{version}[list of 
 
 * Fixed non-functional `kotlincHelp` target
 
-_See https://github.com/lefou/mill-kotlin/milestone/{github-milestone}?closed=1[milstone {version}]
-and the https://github.com/lefou/mill-kotlin/compare/{prev-version}...{version}[list of commits]_
+_See
+ifeval::["{github-milestone}" != ""]
+https://github.com/lefou/mill-kotlin/milestone/{github-milestone}?closed=1[milstone {version}]
+and the
+endif::[]
+https://github.com/lefou/mill-kotlin/compare/{prev-version}...{version}[list of commits]_
 
 === mill-kotlin 0.0.1 - 2020-02-20
 :version: 0.0.1
 :prev-version: 6756a7323d020eabedf9a9cd70f54c61fe30472a
+:github-milestone:
 
 * Initial release
 
 _See
-ifdef::github-milestone[]
+ifeval::["{github-milestone}" != ""]
 https://github.com/lefou/mill-kotlin/milestone/{github-milestone}?closed=1[milstone {version}]
 and the
 endif::[]
