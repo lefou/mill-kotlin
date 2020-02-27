@@ -2,11 +2,12 @@ import mill._
 import mill.define.{Module, Target}
 import mill.scalalib._
 import mill.scalalib.publish._
-import $ivy.`de.tototec::de.tobiasroeser.mill.integrationtest:0.1.2`
+import $ivy.`de.tototec::de.tobiasroeser.mill.integrationtest:0.2.1`
 import de.tobiasroeser.mill.integrationtest._
 import mill.api.Loose
 import mill.main.Tasks
 
+val baseDir = build.millSourcePath
 
 object Deps {
   def kotlinVersion = "1.3.61"
@@ -18,7 +19,7 @@ object Deps {
   val millMainApi = ivy"com.lihaoyi::mill-main-api:${millVersion}"
   val millMain = ivy"com.lihaoyi::mill-main:${millVersion}"
   val millScalalib = ivy"com.lihaoyi::mill-scalalib:${millVersion}"
-  val osLib = ivy"com.lihaoyi::os-lib:0.6.2"
+  val osLib = ivy"com.lihaoyi::os-lib:0.6.3"
   val scalaTest = ivy"org.scalatest::scalatest:3.0.8"
   val slf4j = ivy"org.slf4j:slf4j-api:1.7.25"
   val utilsFunctional = ivy"de.tototec:de.tototec.utils.functional:2.0.1"
@@ -168,55 +169,61 @@ object GitSupport extends Module {
 
 }
 
+object P extends Module {
 
-/** Run tests. */
-def test() = T.command {
-  main.test.test()()
-  itest.test()()
-}
-
-def install() = T.command {
-  T.ctx().log.info("Installing")
-  test()()
-  api.publishLocal()()
-  worker.publishLocal()()
-  main.publishLocal()()
-}
-
-def checkRelease: T[Boolean] = T.input {
-  if (GitSupport.publishVersion()._2.contains("DIRTY")) {
-    mill.api.Result.Failure("Project (git) state is dirty. Release not recommended!", Some(false))
-  } else { true }
-}
-
-/** Test and release to Maven Central. */
-def release(
-             sonatypeCreds: String,
-             release: Boolean = true
-           ) = T.command {
-  if(checkRelease()) {
-    test()()
-    PublishModule.publishAll(
-      sonatypeCreds = sonatypeCreds,
-      release = release,
-      publishArtifacts = Tasks(Seq(
-        api.publishArtifacts,
-        worker.publishArtifacts,
-        main.publishArtifacts
-      )),
-      readTimeout = 600000
-    )()
+  /** Run tests. */
+  def test() = T.command {
+    main.test.test()()
+    itest.test()()
   }
-  ()
-}
 
-/**
- * Update the millw script.
- */
-def millw() = T.command {
-  val target = mill.modules.Util.download("https://raw.githubusercontent.com/lefou/millw/master/millw")
-  val millw = build.millSourcePath / "millw"
-  os.copy.over(target.path, millw)
-  os.perms.set(millw, os.perms(millw) + java.nio.file.attribute.PosixFilePermission.OWNER_EXECUTE)
-  target
+  def install() = T.command {
+    T.ctx().log.info("Installing")
+    test()()
+    api.publishLocal()()
+    worker.publishLocal()()
+    main.publishLocal()()
+    println(s"Installed version ${main.publishVersion()}")
+  }
+
+  def checkRelease: T[Boolean] = T.input {
+    if (GitSupport.publishVersion()._2.contains("DIRTY")) {
+      mill.api.Result.Failure("Project (git) state is dirty. Release not recommended!", Some(false))
+    } else {
+      true
+    }
+  }
+
+  /** Test and release to Maven Central. */
+  def release(
+               sonatypeCreds: String,
+               release: Boolean = true
+             ) = T.command {
+    if (checkRelease()) {
+      test()()
+      PublishModule.publishAll(
+        sonatypeCreds = sonatypeCreds,
+        release = release,
+        publishArtifacts = Tasks(Seq(
+          api.publishArtifacts,
+          worker.publishArtifacts,
+          main.publishArtifacts
+        )),
+        readTimeout = 600000
+      )()
+    }
+    ()
+  }
+
+  /**
+   * Update the millw script.
+   */
+  def millw() = T.command {
+    val target = mill.modules.Util.download("https://raw.githubusercontent.com/lefou/millw/master/millw")
+    val millw = baseDir / "millw"
+    os.copy.over(target.path, millw)
+    os.perms.set(millw, os.perms(millw) + java.nio.file.attribute.PosixFilePermission.OWNER_EXECUTE)
+    target
+  }
+
 }

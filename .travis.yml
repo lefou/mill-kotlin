@@ -11,4 +11,4 @@ env:
   - TEST_MILL_VERSION=0.6.1
 
 script:
-  - ./millw test
+  - ./millw P.test
