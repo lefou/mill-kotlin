@@ -197,9 +197,4 @@ trait KotlinModule extends JavaModule { outer =>
 
 }
 
-/**
- * A [[TestModule]] with support for the Kotlin compiler.
- * @see [[KotlinModule]] for details.
- */
-trait KotlinTestModule extends TestModule with KotlinModule {
-}
+
