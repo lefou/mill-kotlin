@@ -87,7 +87,7 @@ The following table shows a matrix of compatible mill and mill-kotlin versions.
 [options="header"]
 |===
 | mill-kotlin | mill
-| master | 0.6.0 - 0.6.1
+| master | 0.6.0 - 0.7.3
 | 0.0.3 | 0.6.0 - 0.6.1
 | 0.0.2 | 0.5.7
 | 0.0.1 | 0.5.7
@@ -130,7 +130,9 @@ Contributing::
 === master
 :version: master
 :prev-version: 0.0.3
-:github-milestone:
+:github-milestone:2
+
+* Cross published for Mill 0.6 and 0.7, also Scala 2.12 and Scala 2.13.
 
 _See
 ifeval::["{github-milestone}" != ""]
