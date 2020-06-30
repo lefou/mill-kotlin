@@ -1,11 +1,13 @@
+import $exec.plugins
+import $ivy.`org.scoverage::scalac-scoverage-runtime:1.4.1`
+
 import mill._
 import mill.scalalib._
 import mill.define._
 
-import $exec.plugins
 import de.tobiasroeser.mill.kotlin._
 
-import $ivy.`org.scalatest::scalatest:3.0.4`
+import $ivy.`org.scalatest::scalatest:3.0.8`
 import org.scalatest.Assertions
 
 // Adapted from source: https://github.com/Kotlin/kotlin-examples/tree/master/maven/hello-world

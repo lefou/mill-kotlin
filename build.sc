@@ -1,18 +1,23 @@
+// mill plugins
+import $ivy.`de.tototec::de.tobiasroeser.mill.integrationtest:0.3.1-16-f356b6`
+import $ivy.`de.tototec::de.tobiasroeser.mill.vcs.version:0.0.1`
+import $ivy.`com.lihaoyi::mill-contrib-scoverage:$MILL_VERSION`
+
+// imports
+import de.tobiasroeser.mill.integrationtest._
+import de.tobiasroeser.mill.vcs.version.VcsVersion
 import mill._
-import mill.define.{Module, Target}
+import mill.api.Loose
+import mill.contrib.scoverage.ScoverageModule
+import mill.define.{Module, Target, Task}
+import mill.main.Tasks
 import mill.scalalib._
 import mill.scalalib.publish._
-import $ivy.`de.tototec::de.tobiasroeser.mill.integrationtest:0.2.1`
-import de.tobiasroeser.mill.integrationtest._
-import mill.api.Loose
-import mill.main.Tasks
 
-val baseDir = build.millSourcePath
-
-object Deps {
+trait Deps {
   def kotlinVersion = "1.3.61"
-  def millVersion = "0.6.0"
-  def scalaVersion = "2.12.10"
+  def millVersion = "0.7.0"
+  def scalaVersion = "2.13.2"
 
   val kotlinCompiler = ivy"org.jetbrains.kotlin:kotlin-compiler:${kotlinVersion}"
   val logbackClassic = ivy"ch.qos.logback:logback-classic:1.1.3"
@@ -24,14 +29,33 @@ object Deps {
   val slf4j = ivy"org.slf4j:slf4j-api:1.7.25"
   val utilsFunctional = ivy"de.tototec:de.tototec.utils.functional:2.0.1"
 }
+object Deps_0_7 extends Deps
+object Deps_0_6 extends Deps {
+  override def millVersion = "0.6.0"
+  override def scalaVersion = "2.12.10"
+}
 
-trait MillKotlinModule extends ScalaModule with PublishModule {
+val millApiVersions = Seq(
+  "0.7" -> Deps_0_7,
+  "0.6" -> Deps_0_6,
+)
 
-  def scalaVersion = T { Deps.scalaVersion }
+val millItestVersions = Seq(
+  "0.7.3", "0.7.2", "0.7.1", "0.7.0",
+  "0.6.3", "0.6.2", "0.6.1", "0.6.0",
+)
 
-  def publishVersion = GitSupport.publishVersion()._2
+val baseDir = build.millSourcePath
 
-  override def javacOptions = Seq("-source", "1.8", "-target", "1.8")
+
+trait MillKotlinModule extends CrossScalaModule with PublishModule with ScoverageModule {
+  def deps: Deps
+  override def crossScalaVersion = deps.scalaVersion
+  override def publishVersion: T[String] = VcsVersion.vcsState().format()
+
+  override def javacOptions = Seq("-source", "1.8", "-target", "1.8", "-encoding", "UTF-8")
+  override def scalacOptions = Seq("-target:jvm-1.8", "-encoding", "UTF-8")
+  override def scoverageVersion = "1.4.1"
 
   def pomSettings = T {
     PomSettings(
@@ -44,176 +68,109 @@ trait MillKotlinModule extends ScalaModule with PublishModule {
     )
   }
 
+  override def skipIdea: Boolean = millApiVersions.head._2.scalaVersion != crossScalaVersion
 }
 
-object api extends MillKotlinModule {
+object api extends Cross[ApiCross](millApiVersions.map(_._1): _*)
+class ApiCross(millApiVersion: String) extends MillKotlinModule {
+  override def deps: Deps = millApiVersions.toMap.apply(millApiVersion)
   override def artifactName = T { "de.tobiasroeser.mill.kotlin-api" }
   override def compileIvyDeps: T[Loose.Agg[Dep]] = T{ Agg(
-    Deps.millMainApi,
-    Deps.osLib
+    deps.millMainApi,
+    deps.osLib
   )}
 }
 
-object worker extends MillKotlinModule {
+object worker extends Cross[WorkerCross](millApiVersions.map(_._1): _*)
+class WorkerCross(millApiVersion: String) extends MillKotlinModule {
+  override def deps: Deps = millApiVersions.toMap.apply(millApiVersion)
   override def artifactName = T { "de.tobiasroeser.mill.kotlin-worker" }
-  override def moduleDeps: Seq[PublishModule] = Seq(api)
+  override def moduleDeps: Seq[PublishModule] = Seq(api(millApiVersion))
   override def compileIvyDeps: T[Loose.Agg[Dep]] = T{ Agg(
-    Deps.osLib,
-    Deps.millMainApi,
-    Deps.kotlinCompiler
+    deps.osLib,
+    deps.millMainApi,
+    deps.kotlinCompiler
   )}
 }
 
-object main extends MillKotlinModule with ScalaModule {
+object main extends Cross[MainCross](millApiVersions.map(_._1): _*)
+class MainCross(millApiVersion: String) extends MillKotlinModule {
+  override def deps: Deps = millApiVersions.toMap.apply(millApiVersion)
   override def artifactName = T { "de.tobiasroeser.mill.kotlin" }
-  override def moduleDeps: Seq[PublishModule] = Seq(api)
+  override def moduleDeps: Seq[PublishModule] = Seq(api(millApiVersion))
   override def ivyDeps = T {
     Agg(ivy"${scalaOrganization()}:scala-library:${scalaVersion()}")
   }
   override def compileIvyDeps = Agg(
-    Deps.millMain,
-    Deps.millScalalib
+    deps.millMain,
+    deps.millScalalib
   )
 
   object test extends Tests {
     override def ivyDeps = Agg(
-      Deps.scalaTest
+      deps.scalaTest
     )
     def testFrameworks = Seq("org.scalatest.tools.Framework")
   }
 
   override def generatedSources: Target[Seq[PathRef]] = T{
-    super.generatedSources() ++ {
-      val dest = T.ctx().dest
-      val body =
-        s"""package de.tobiasroeser.mill.kotlin
-          |
-          |/**
-          | * Build-time generated versions file.
-          | */
-          |object Versions {
-          |  /** The mill-kotlin version. */
-          |  val millKotlinVersion = "${publishVersion()}"
-          |  /** The mill API version used to build mill-kotlin. */
-          |  val buildTimeMillVersion = "${Deps.millVersion}"
-          |  /** The ivy dependency holding the mill kotlin worker impl. */
-          |  val millKotlinWorkerImplIvyDep = "${worker.pomSettings().organization}:${worker.artifactId()}:${worker.publishVersion()}"
-          |  /** The default kotlin version used for the compiler. */
-          |  val kotlinCompilerVersion = "${Deps.kotlinVersion}"
-          |}
-          |""".stripMargin
-
-      os.write(dest / "Versions.scala", body)
-
-      Seq(PathRef(dest))
-    }
+    super.generatedSources() :+ versionFile()
   }
+
+  def versionFile: Target[PathRef] = T{
+    val dest = T.ctx().dest
+    val body =
+      s"""package de.tobiasroeser.mill.kotlin
+        |
+        |/**
+        | * Build-time generated versions file.
+        | */
+        |object Versions {
+        |  /** The mill-kotlin version. */
+        |  val millKotlinVersion = "${publishVersion()}"
+        |  /** The mill API version used to build mill-kotlin. */
+        |  val buildTimeMillVersion = "${deps.millVersion}"
+        |  /** The ivy dependency holding the mill kotlin worker impl. */
+        |  val millKotlinWorkerImplIvyDep = "${worker(millApiVersion).pomSettings().organization}:${worker(millApiVersion).artifactId()}:${worker(millApiVersion).publishVersion()}"
+        |  /** The default kotlin version used for the compiler. */
+        |  val kotlinCompilerVersion = "${deps.kotlinVersion}"
+        |}
+        |""".stripMargin
+
+    os.write(dest / "Versions.scala", body)
+    PathRef(dest)
+}
 
 }
 
-object itest extends MillIntegrationTestModule {
-
-  def millTestVersion = T {
-    val ctx = T.ctx()
-    ctx.env.get("TEST_MILL_VERSION").filterNot(_.isEmpty).getOrElse(Deps.millVersion)
-  }
-
-  def pluginsUnderTest = Seq(main)
-  def temporaryIvyModules = Seq(api, worker)
-
+object itest extends Cross[ItestCross](millItestVersions: _*)
+class ItestCross(millItestVersion: String) extends MillIntegrationTestModule {
+  val millApiVersion = millItestVersion.split("[.]").take(2).mkString(".")
+  override def millSourcePath: os.Path = super.millSourcePath / os.up
+  override def millTestVersion = millItestVersion
+  override def pluginsUnderTest = Seq(main(millApiVersion))
+  override def temporaryIvyModules = Seq(api(millApiVersion), worker(millApiVersion))
   override def testTargets: T[Seq[String]] = T{ Seq("-d", "verify") }
 
-}
-
-object GitSupport extends Module {
-
-  /**
-   * The current git revision.
-   */
-  def gitHead: T[String] = T.input {
-    sys.env.get("TRAVIS_COMMIT").getOrElse(
-      os.proc('git, "rev-parse", "HEAD").call().out.trim
-    ).toString()
-  }
-
-  /**
-   * Calc a publishable version based on git tags and dirty state.
-   *
-   * @return A tuple of (the latest tag, the calculated version string)
-   */
-  def publishVersion: T[(String, String)] = T.input {
-    val tag =
-      try Option(
-        os.proc('git, 'describe, "--exact-match", "--tags", "--always", gitHead()).call().out.trim
-      )
-      catch {
-        case e => None
+  override def temporaryIvyModulesDetails: Task.Sequence[(PathRef, (PathRef, (PathRef, (PathRef, (PathRef, Artifact)))))] =
+    Target.traverse(temporaryIvyModules) { p =>
+      val jar = p match {
+        case p: ScoverageModule => p.scoverage.jar
+        case p => p.jar
       }
-
-    val dirtySuffix = os.proc('git, 'diff).call().out.string.trim() match {
-      case "" => ""
-      case s => "-DIRTY" + Integer.toHexString(s.hashCode)
+      jar zip (p.sourceJar zip (p.docJar zip (p.pom zip (p.ivy zip p.artifactMetadata))))
     }
-
-    tag match {
-      case Some(t) => (t, t)
-      case None =>
-        val latestTaggedVersion = os.proc('git, 'describe, "--abbrev=0", "--always", "--tags").call().out.trim
-
-        val commitsSinceLastTag =
-          os.proc('git, "rev-list", gitHead(), "--not", latestTaggedVersion, "--count").call().out.trim.toInt
-
-        (latestTaggedVersion, s"$latestTaggedVersion-$commitsSinceLastTag-${gitHead().take(6)}$dirtySuffix")
+  override def pluginUnderTestDetails: Task.Sequence[(PathRef, (PathRef, (PathRef, (PathRef, (PathRef, Artifact)))))] =
+    Target.traverse(pluginsUnderTest) { p =>
+      val jar = p match {
+        case p: ScoverageModule => p.scoverage.jar
+        case p => p.jar
+      }
+      jar zip (p.sourceJar zip (p.docJar zip (p.pom zip (p.ivy zip p.artifactMetadata))))
     }
-  }
-
 }
 
 object P extends Module {
-
-  /** Run tests. */
-  def test() = T.command {
-    main.test.test()()
-    itest.test()()
-  }
-
-  def install() = T.command {
-    T.ctx().log.info("Installing")
-    test()()
-    api.publishLocal()()
-    worker.publishLocal()()
-    main.publishLocal()()
-    println(s"Installed version ${main.publishVersion()}")
-  }
-
-  def checkRelease: T[Boolean] = T.input {
-    if (GitSupport.publishVersion()._2.contains("DIRTY")) {
-      mill.api.Result.Failure("Project (git) state is dirty. Release not recommended!", Some(false))
-    } else {
-      true
-    }
-  }
-
-  /** Test and release to Maven Central. */
-  def release(
-               sonatypeCreds: String,
-               release: Boolean = true
-             ) = T.command {
-    if (checkRelease()) {
-      test()()
-      PublishModule.publishAll(
-        sonatypeCreds = sonatypeCreds,
-        release = release,
-        publishArtifacts = Tasks(Seq(
-          api.publishArtifacts,
-          worker.publishArtifacts,
-          main.publishArtifacts
-        )),
-        readTimeout = 600000
-      )()
-    }
-    ()
-  }
 
   /**
    * Update the millw script.
