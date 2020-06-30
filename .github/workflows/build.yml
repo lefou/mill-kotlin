@@ -3,7 +3,7 @@ on: [push, pull_request]
 env:
   PUBLISH_OS: ubuntu-latest
   PUBLISH_JAVA_VERSION: 1.8
-  PUBLISH_BRANCH: refs/heads/master
+  PUBLISH_BRANCH: refs/heads/main
 
 jobs: 
   build:
