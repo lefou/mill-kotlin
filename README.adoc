@@ -7,7 +7,8 @@
 :toc-placement: preamble
 
 ifdef::env-github[]
-image:https://travis-ci.org/lefou/mill-kotlin.svg?branch=master["Build Status", link="https://travis-ci.org/lefou/mill-kotlin"]
+image:https://github.com/lefou/mill-kotlin/workflows/.github/workflows/build.yml/badge.svg["Build Status (GitHub Actions)", link="https://github.com/lefou/mill-kotlin/actions"]
+image:https://codecov.io/gh/lefou/mill-kotlin/branch/main/graph/badge.svg[Test Coverage (Codecov.io), link="https://codecov.io/gh/lefou/mill-kotlin"]
 endif::[]
 
 Documentation for mill-kotlin, a mill plugin to support the https://kotlinlang.org/[Kotlin language and compiler].
