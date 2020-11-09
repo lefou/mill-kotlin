@@ -7,7 +7,7 @@ import mill.define._
 
 import de.tobiasroeser.mill.kotlin._
 
-import $ivy.`org.scalatest::scalatest:3.2.2`
+import $ivy.`org.scalatest::scalatest:3.2.3`
 import org.scalatest.Assertions
 
 // Adapted from source: https://github.com/Kotlin/kotlin-examples/tree/master/maven/hello-world
