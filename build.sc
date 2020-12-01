@@ -147,7 +147,7 @@ class MainCross(override val millPlatform: String) extends MillKotlinModule {
 
 }
 
-object itest extends Cross[ItestCross](millItestVersions: _*)
+object itest extends Cross[ItestCross](millItestVersions.map(_._1): _*)
 class ItestCross(millItestVersion: String) extends MillIntegrationTestModule {
   val millPlatform = millItestVersions.toMap.apply(millItestVersion).millPlatform
   override def millSourcePath: os.Path = super.millSourcePath / os.up
