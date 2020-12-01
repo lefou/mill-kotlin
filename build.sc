@@ -1,6 +1,6 @@
 // mill plugins
-import $ivy.`de.tototec::de.tobiasroeser.mill.integrationtest:0.3.3`
-import $ivy.`de.tototec::de.tobiasroeser.mill.vcs.version:0.0.1`
+import $ivy.`de.tototec::de.tobiasroeser.mill.integrationtest_mill0.7:0.4.0`
+import $ivy.`de.tototec::de.tobiasroeser.mill.vcs.version_mill0.7:0.1.0`
 import $ivy.`com.lihaoyi::mill-contrib-scoverage:$MILL_VERSION`
 
 // imports
@@ -16,8 +16,10 @@ import mill.scalalib.publish._
 
 trait Deps {
   def kotlinVersion = "1.3.61"
-  def millVersion = "0.7.0"
-  def scalaVersion = "2.13.2"
+  def millPlatform = "0.9"
+  def millVersion = "0.9.3"
+  def scalaVersion = "2.13.4"
+  def testWithMill = Seq("0.9.3")
 
   val kotlinCompiler = ivy"org.jetbrains.kotlin:kotlin-compiler:${kotlinVersion}"
   val logbackClassic = ivy"ch.qos.logback:logback-classic:1.1.3"
@@ -26,36 +28,41 @@ trait Deps {
   val millScalalib = ivy"com.lihaoyi::mill-scalalib:${millVersion}"
   val osLib = ivy"com.lihaoyi::os-lib:0.6.3"
   val scalaTest = ivy"org.scalatest::scalatest:3.2.3"
+  val scoverageVersion = "1.4.1"
   val slf4j = ivy"org.slf4j:slf4j-api:1.7.25"
   val utilsFunctional = ivy"de.tototec:de.tototec.utils.functional:2.0.1"
 }
-object Deps_0_7 extends Deps
+object Deps_0_9 extends Deps
+object Deps_0_7 extends Deps {
+  override def millVersion = "0.7.0"
+  override def millPlatform = "0.7"
+  override def scalaVersion = "2.13.2"
+  override def testWithMill = Seq("0.8.0", "0.7.4", "0.7.3", "0.7.2", "0.7.1", "0.7.0")
+}
 object Deps_0_6 extends Deps {
   override def millVersion = "0.6.0"
+  override def millPlatform = "0.6"
   override def scalaVersion = "2.12.10"
+  override def testWithMill = Seq("0.6.3", "0.6.2", "0.6.1", "0.6.0")
 }
 
-val millApiVersions = Seq(
-  "0.7" -> Deps_0_7,
-  "0.6" -> Deps_0_6,
-)
+val millApiVersions = Seq(Deps_0_9, Deps_0_7, Deps_0_6).map(x => x.millPlatform -> x)
 
-val millItestVersions = Seq(
-  "0.7.4", "0.7.3", "0.7.2", "0.7.1", "0.7.0",
-  "0.6.3", "0.6.2", "0.6.1", "0.6.0",
-)
+val millItestVersions = millApiVersions.flatMap { case (_, d) => d.testWithMill.map(_ -> d) }
 
 val baseDir = build.millSourcePath
 
 
 trait MillKotlinModule extends CrossScalaModule with PublishModule with ScoverageModule {
-  def deps: Deps
+  def millPlatform: String
+  def deps: Deps = millApiVersions.toMap.apply(millPlatform)
   override def crossScalaVersion = deps.scalaVersion
   override def publishVersion: T[String] = VcsVersion.vcsState().format()
+  override def artifactSuffix: T[String] = s"_mill${millPlatform}_${artifactScalaVersion()}"
 
   override def javacOptions = Seq("-source", "1.8", "-target", "1.8", "-encoding", "UTF-8")
   override def scalacOptions = Seq("-target:jvm-1.8", "-encoding", "UTF-8")
-  override def scoverageVersion = "1.4.1"
+  override def scoverageVersion = deps.scoverageVersion
 
   def pomSettings = T {
     PomSettings(
@@ -72,8 +79,7 @@ trait MillKotlinModule extends CrossScalaModule with PublishModule with Scoverag
 }
 
 object api extends Cross[ApiCross](millApiVersions.map(_._1): _*)
-class ApiCross(millApiVersion: String) extends MillKotlinModule {
-  override def deps: Deps = millApiVersions.toMap.apply(millApiVersion)
+class ApiCross(override val millPlatform: String) extends MillKotlinModule {
   override def artifactName = T { "de.tobiasroeser.mill.kotlin-api" }
   override def compileIvyDeps: T[Loose.Agg[Dep]] = T{ Agg(
     deps.millMainApi,
@@ -82,10 +88,9 @@ class ApiCross(millApiVersion: String) extends MillKotlinModule {
 }
 
 object worker extends Cross[WorkerCross](millApiVersions.map(_._1): _*)
-class WorkerCross(millApiVersion: String) extends MillKotlinModule {
-  override def deps: Deps = millApiVersions.toMap.apply(millApiVersion)
+class WorkerCross(override val millPlatform: String) extends MillKotlinModule {
   override def artifactName = T { "de.tobiasroeser.mill.kotlin-worker" }
-  override def moduleDeps: Seq[PublishModule] = Seq(api(millApiVersion))
+  override def moduleDeps: Seq[PublishModule] = Seq(api(millPlatform))
   override def compileIvyDeps: T[Loose.Agg[Dep]] = T{ Agg(
     deps.osLib,
     deps.millMainApi,
@@ -94,10 +99,9 @@ class WorkerCross(millApiVersion: String) extends MillKotlinModule {
 }
 
 object main extends Cross[MainCross](millApiVersions.map(_._1): _*)
-class MainCross(millApiVersion: String) extends MillKotlinModule {
-  override def deps: Deps = millApiVersions.toMap.apply(millApiVersion)
+class MainCross(override val millPlatform: String) extends MillKotlinModule {
   override def artifactName = T { "de.tobiasroeser.mill.kotlin" }
-  override def moduleDeps: Seq[PublishModule] = Seq(api(millApiVersion))
+  override def moduleDeps: Seq[PublishModule] = Seq(api(millPlatform))
   override def ivyDeps = T {
     Agg(ivy"${scalaOrganization()}:scala-library:${scalaVersion()}")
   }
@@ -131,7 +135,7 @@ class MainCross(millApiVersion: String) extends MillKotlinModule {
         |  /** The mill API version used to build mill-kotlin. */
         |  val buildTimeMillVersion = "${deps.millVersion}"
         |  /** The ivy dependency holding the mill kotlin worker impl. */
-        |  val millKotlinWorkerImplIvyDep = "${worker(millApiVersion).pomSettings().organization}:${worker(millApiVersion).artifactId()}:${worker(millApiVersion).publishVersion()}"
+        |  val millKotlinWorkerImplIvyDep = "${worker(millPlatform).pomSettings().organization}:${worker(millPlatform).artifactId()}:${worker(millPlatform).publishVersion()}"
         |  /** The default kotlin version used for the compiler. */
         |  val kotlinCompilerVersion = "${deps.kotlinVersion}"
         |}
@@ -143,13 +147,13 @@ class MainCross(millApiVersion: String) extends MillKotlinModule {
 
 }
 
-object itest extends Cross[ItestCross](millItestVersions: _*)
+object itest extends Cross[ItestCross](millItestVersions.map(_._1): _*)
 class ItestCross(millItestVersion: String) extends MillIntegrationTestModule {
-  val millApiVersion = millItestVersion.split("[.]").take(2).mkString(".")
+  val millPlatform = millItestVersions.toMap.apply(millItestVersion).millPlatform
   override def millSourcePath: os.Path = super.millSourcePath / os.up
   override def millTestVersion = millItestVersion
-  override def pluginsUnderTest = Seq(main(millApiVersion))
-  override def temporaryIvyModules = Seq(api(millApiVersion), worker(millApiVersion))
+  override def pluginsUnderTest = Seq(main(millPlatform))
+  override def temporaryIvyModules = Seq(api(millPlatform), worker(millPlatform))
   override def testTargets: T[Seq[String]] = T{ Seq("-d", "verify") }
 
   override def temporaryIvyModulesDetails: Task.Sequence[(PathRef, (PathRef, (PathRef, (PathRef, (PathRef, Artifact)))))] =
