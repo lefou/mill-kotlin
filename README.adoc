@@ -153,6 +153,7 @@ Contributing::
 :prev-version: 0.1.1
 :github-milestone: 4
 
+* Fixes and improvements
 
 _See
 ifeval::["{github-milestone}" != ""]
@@ -162,7 +163,7 @@ endif::[]
 https://github.com/lefou/mill-kotlin/compare/{prev-version}...{version}[list of commits]_
 
 * Support for mill API 0.9.3
-* Introduced artifact suffix indication the mill platform (e.g. `mill0.9`)
+* Introduced artifact suffix indicating the mill platform (e.g. `mill0.9`)
 
 === mill-kotlin 0.1.1 - 2020-12-01
 :version: 0.1.1
