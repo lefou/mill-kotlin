@@ -71,7 +71,7 @@ trait KotlinModule extends JavaModule { outer =>
    * Default is derived from [[kotlinCompilerIvyDeps]].
    */
   def kotlinCompilerClasspath: T[Seq[PathRef]] = T {
-    resolveDeps(kotlinCompilerIvyDeps)().iterator.to(Seq)
+    resolveDeps(kotlinCompilerIvyDeps)().toSeq
   }
 
   def kotlinWorker: Worker[KotlinWorker] = T.worker {
@@ -137,9 +137,9 @@ trait KotlinModule extends JavaModule { outer =>
         // destdir
         Seq("-d", classes.toIO.getAbsolutePath()),
         // classpath
-        if (compileClasspath().iterator.isEmpty) Seq() else Seq(
+        if (compileClasspath().isEmpty) Seq() else Seq(
           "-classpath",
-          compileClasspath().iterator
+          compileClasspath()
             .map(_.path.toIO.getAbsolutePath())
             .mkString(File.pathSeparator)
         ),
