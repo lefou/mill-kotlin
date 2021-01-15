@@ -97,7 +97,7 @@ The following table shows a matrix of compatible mill and mill-kotlin versions.
 | 0.0.1 | 0.5.7
 |===
 
-Toe ensure some basic compatibility, there are some integration tests in place.
+To ensure some basic compatibility, there are some integration tests in place.
 Newer mill versions may work as well.
 
 If you need support for other versions, please create an {projectHome}/issues[issue].
@@ -136,7 +136,7 @@ Mill::
 Me::
 +
 --
-I am https://github.com/lefou/[Tobias Roeser] a professional software developer who loves to create and use open source tools.
+I am https://github.com/lefou/[Tobias Roeser], a professional software developer who loves to create and use open source tools.
 I'm actively developing and maintaining mill as well as https://github.com/lefou?utf8=%E2%9C%93&tab=repositories&q=topic%3Amill&type=&language=[several mill plugins].
 
 If you like my work, please star it on GitHub. You can also support me via https://github.com/sponsors/lefou[GitHub Sponsors].
