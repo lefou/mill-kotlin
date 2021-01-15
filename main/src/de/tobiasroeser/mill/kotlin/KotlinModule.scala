@@ -51,9 +51,7 @@ trait KotlinModule extends JavaModule { outer =>
    * The version of the Kotlin compiler to be used.
    * Default is derived from [[kotlinVersion]].
    */
-  def kotlinCompilerVersion: T[String] = T {
-    Versions.kotlinCompilerVersion
-  }
+  def kotlinCompilerVersion: T[String] = T { kotlinVersion() }
 
   /**
    * The Ivy/Coursier dependencies resembling the Kotlin compiler.
@@ -73,7 +71,7 @@ trait KotlinModule extends JavaModule { outer =>
    * Default is derived from [[kotlinCompilerIvyDeps]].
    */
   def kotlinCompilerClasspath: T[Seq[PathRef]] = T {
-    resolveDeps(kotlinCompilerIvyDeps)().toSeq
+    resolveDeps(kotlinCompilerIvyDeps)().iterator.to(Seq)
   }
 
   def kotlinWorker: Worker[KotlinWorker] = T.worker {
@@ -109,7 +107,7 @@ trait KotlinModule extends JavaModule { outer =>
   }
 
   /**
-   * The actual Kotlin compile task (used by [[compile]] and [[kotlincHelp()]].
+   * The actual Kotlin compile task (used by [[compile]] and [[kotlincHelp]].
    */
   protected def kotlinCompileTask(extraKotlinArgs: Seq[String] = Seq()): Task[CompilationResult] = T.task {
     val ctx = T.ctx()
@@ -117,14 +115,14 @@ trait KotlinModule extends JavaModule { outer =>
     val classes = dest / "classes"
     os.makeDir.all(classes)
 
-    val isKotlin = !allKotlinSourceFiles().isEmpty
-    val isJava = !allJavaSourceFiles().isEmpty
+    val isKotlin = allKotlinSourceFiles().nonEmpty
+    val isJava = allJavaSourceFiles().nonEmpty
     val isMixed = isKotlin && isJava
 
     val counts = Seq("Kotlin" -> allKotlinSourceFiles().size, "Java" -> allJavaSourceFiles().size)
     ctx.log.info(s"Compiling ${counts.filter(_._2 > 0).map{ case (n,c) => s"$c $n" }.mkString(" and ")} sources to ${classes} ...")
 
-    def compileJava = {
+    def compileJava: Result[CompilationResult] = {
       zincWorker.worker().compileJava(
         upstreamCompileOutput(),
         allJavaSourceFiles().map(_.path),
@@ -139,14 +137,14 @@ trait KotlinModule extends JavaModule { outer =>
         // destdir
         Seq("-d", classes.toIO.getAbsolutePath()),
         // classpath
-        if (compileClasspath().isEmpty) Seq() else Seq(
+        if (compileClasspath().iterator.isEmpty) Seq() else Seq(
           "-classpath",
-          compileClasspath().toSeq
+          compileClasspath().iterator
             .map(_.path.toIO.getAbsolutePath())
             .mkString(File.pathSeparator)
         ),
-        Seq("-api-version", kotlinVersion().split("[.]", 3).take(2).mkString(".")),
         Seq("-language-version", kotlinVersion().split("[.]", 3).take(2).mkString(".")),
+        Seq("-api-version", kotlinVersion().split("[.]", 3).take(2).mkString(".")),
         kotlincOptions(),
         extraKotlinArgs,
         // parameters
@@ -159,7 +157,7 @@ trait KotlinModule extends JavaModule { outer =>
       os.write(target = analysisFile, data = "", createFolders = true)
 
       workerResult match {
-        case Result.Success(value) =>
+        case Result.Success(_) =>
           val cr = CompilationResult(analysisFile, PathRef(classes))
           if (!isJava) {
             // pure Kotlin project
@@ -169,7 +167,7 @@ trait KotlinModule extends JavaModule { outer =>
             // also run Java compiler
             compileJava
           }
-        case Result.Failure(reason, value) => Result.Failure(reason, Some(CompilationResult(analysisFile, PathRef(classes))))
+        case Result.Failure(reason, _) => Result.Failure(reason, Some(CompilationResult(analysisFile, PathRef(classes))))
         case e: Result.Exception => e
         case Result.Aborted => Result.Aborted
         case Result.Skipped => Result.Skipped
@@ -189,11 +187,12 @@ trait KotlinModule extends JavaModule { outer =>
   /**
    * A test sub-module linked to its parent module best suited for unit-tests.
    */
-  trait Tests extends super.Tests with KotlinTestModule {
+  trait KotlinModuleTests extends super.Tests with KotlinTestModule {
     override def kotlinVersion: T[String] = T{ outer.kotlinVersion() }
-    override def kotlinCompilerVersion: T[String] = T{ outer.kotlinCompilerVersion }
-    override def kotlincOptions: T[Seq[String]] = T{ super.kotlincOptions }
+    override def kotlinCompilerVersion: T[String] = T{ outer.kotlinCompilerVersion() }
+    override def kotlincOptions: T[Seq[String]] = T{ outer.kotlincOptions() }
   }
+  trait Tests extends KotlinModuleTests
 
 }
 
