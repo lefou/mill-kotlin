@@ -13,11 +13,7 @@ import org.scalatest.Assertions
 // Adapted from source: https://github.com/Kotlin/kotlin-examples/tree/master/maven/mixed-code-hello-world
 object main extends KotlinModule {
 
-  def kotlinVersion = T{ "1.2.0" }
-
-  def ivyDeps = T{ Agg(
-    ivy"org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion()}"
-  )}
+  def kotlinVersion = "1.2.0"
 
   def mainClass = Some("hello.JavaHello")
 

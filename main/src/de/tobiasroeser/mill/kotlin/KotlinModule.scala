@@ -48,6 +48,16 @@ trait KotlinModule extends JavaModule { outer =>
   def kotlinVersion: T[String]
 
   /**
+   * The dependencies of this module.
+   * Defaults to add the kotlin-stdlib dependency matching the [[kotlinVersion]].
+   */
+  override def ivyDeps: T[Agg[Dep]] = T {
+    super.ivyDeps() ++ Agg(
+      ivy"org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion()}"
+    )
+  }
+
+  /**
    * The version of the Kotlin compiler to be used.
    * Default is derived from [[kotlinVersion]].
    */
