@@ -38,7 +38,7 @@ jobs:
         with:
           java-version: ${{ matrix.java-version }}
 
-      - run: ./millw -i ${{ targets }}
+      - run: ./millw -i ${{ matrix.targets }}
 
       - run: ./millw __.scoverage.xmlReport
 
