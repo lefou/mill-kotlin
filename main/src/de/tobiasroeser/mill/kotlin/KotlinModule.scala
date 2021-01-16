@@ -131,6 +131,8 @@ trait KotlinModule extends JavaModule { outer =>
     val counts = Seq("Kotlin" -> allKotlinSourceFiles().size, "Java" -> allJavaSourceFiles().size)
     ctx.log.info(s"Compiling ${counts.filter(_._2 > 0).map{ case (n,c) => s"$c $n" }.mkString(" and ")} sources to ${classes} ...")
 
+    val compileCp = compileClasspath().filter(pr => os.exists(pr.path))
+
     def compileJava: Result[CompilationResult] = {
       zincWorker.worker().compileJava(
         upstreamCompileOutput(),
@@ -149,9 +151,9 @@ trait KotlinModule extends JavaModule { outer =>
         // destdir
         Seq("-d", classes.toIO.getAbsolutePath()),
         // classpath
-        if (compileClasspath().isEmpty) Seq() else Seq(
+        if (compileCp.isEmpty) Seq() else Seq(
           "-classpath",
-          compileClasspath()
+          compileCp
             .map(_.path.toIO.getAbsolutePath())
             .mkString(File.pathSeparator)
         ),
