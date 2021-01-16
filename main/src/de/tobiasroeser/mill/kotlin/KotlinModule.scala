@@ -198,7 +198,7 @@ trait KotlinModule extends JavaModule { outer =>
   /**
    * Additional Kotlin compiler options to be use by [[compile]].
    */
-  def kotlincOptions: T[Seq[String]] = T { Seq.empty[String] }
+  def kotlincOptions: T[Seq[String]] = T { Seq("-no-stdlib") }
 
   /**
    * A test sub-module linked to its parent module best suited for unit-tests.
