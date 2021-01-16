@@ -57,13 +57,22 @@ trait KotlinModule extends JavaModule { outer =>
    * The Ivy/Coursier dependencies resembling the Kotlin compiler.
    * Default is derived from [[kotlinCompilerVersion]].
    */
-  def kotlinCompilerIvyDeps: T[Agg[Dep]] = T{ Agg(
-    ivy"org.jetbrains.kotlin:kotlin-compiler:${kotlinCompilerVersion()}",
-    ivy"org.jetbrains.kotlin:kotlin-scripting-compiler:${kotlinCompilerVersion()}",
+  def kotlinCompilerIvyDeps: T[Agg[Dep]] = T{
+    Agg(ivy"${Versions.millKotlinWorkerImplIvyDep}") ++
+      Agg(ivy"org.jetbrains.kotlin:kotlin-compiler:${kotlinCompilerVersion()}") ++
+      (
+        if (Seq("1.0.", "1.1.", "1.2").exists(prefix => kotlinVersion().startsWith(prefix)))
+          Agg(ivy"org.jetbrains.kotlin:kotlin-runtime:${kotlinCompilerVersion()}")
+        else Seq()
+      ) ++
+      (
+        if (!Seq("1.0.", "1.1.", "1.2.0", "1.2.1", "1.2.2", "1.2.3", "1.2.4").exists(prefix => kotlinVersion().startsWith(prefix)))
+          Agg(ivy"org.jetbrains.kotlin:kotlin-scripting-compiler:${kotlinCompilerVersion()}")
+        else Seq()
+      )
 //    ivy"org.jetbrains.kotlin:kotlin-scripting-compiler-impl:${kotlinCompilerVersion()}",
 //    ivy"org.jetbrains.kotlin:kotlin-scripting-common:${kotlinCompilerVersion()}",
-    ivy"${Versions.millKotlinWorkerImplIvyDep}"
-  )}
+  }
 
 
   /**
@@ -132,6 +141,9 @@ trait KotlinModule extends JavaModule { outer =>
       )
     }
 
+    def when(cond: Boolean)(args: String*): Seq[String] = if(cond) args else Seq()
+    val kotlin_1_0 = kotlinVersion().startsWith("1.0")
+
     if(isMixed || isKotlin) {
       val compilerArgs: Seq[String] = Seq(
         // destdir
@@ -143,12 +155,14 @@ trait KotlinModule extends JavaModule { outer =>
             .map(_.path.toIO.getAbsolutePath())
             .mkString(File.pathSeparator)
         ),
-        Seq("-language-version", kotlinVersion().split("[.]", 3).take(2).mkString(".")),
-        Seq("-api-version", kotlinVersion().split("[.]", 3).take(2).mkString(".")),
+        when(!kotlin_1_0)(
+          "-language-version", kotlinVersion().split("[.]", 3).take(2).mkString("."),
+          "-api-version", kotlinVersion().split("[.]", 3).take(2).mkString(".")
+        ),
         kotlincOptions(),
         extraKotlinArgs,
         // parameters
-        allSourceFiles().map(_.path.toIO.getAbsolutePath())
+        (allKotlinSourceFiles() ++ allJavaSourceFiles()).map(_.path.toIO.getAbsolutePath())
       ).flatten
 
       val workerResult = kotlinWorker().compile(compilerArgs: _*)
