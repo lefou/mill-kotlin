@@ -115,6 +115,8 @@ trait KotlinModule extends JavaModule { outer =>
     ()
   }
 
+  protected def when(cond: Boolean)(args: String*): Seq[String] = if(cond) args else Seq()
+
   /**
    * The actual Kotlin compile task (used by [[compile]] and [[kotlincHelp]].
    */
@@ -131,7 +133,7 @@ trait KotlinModule extends JavaModule { outer =>
     val counts = Seq("Kotlin" -> allKotlinSourceFiles().size, "Java" -> allJavaSourceFiles().size)
     ctx.log.info(s"Compiling ${counts.filter(_._2 > 0).map{ case (n,c) => s"$c $n" }.mkString(" and ")} sources to ${classes} ...")
 
-    val compileCp = compileClasspath().filter(pr => os.exists(pr.path))
+    val compileCp = compileClasspath().map(_.path).filter(os.exists)
 
     def compileJava: Result[CompilationResult] = {
       zincWorker.worker().compileJava(
@@ -143,24 +145,12 @@ trait KotlinModule extends JavaModule { outer =>
       )
     }
 
-    def when(cond: Boolean)(args: String*): Seq[String] = if(cond) args else Seq()
-    val kotlin_1_0 = kotlinVersion().startsWith("1.0")
-
     if(isMixed || isKotlin) {
       val compilerArgs: Seq[String] = Seq(
         // destdir
         Seq("-d", classes.toIO.getAbsolutePath()),
         // classpath
-        if (compileCp.isEmpty) Seq() else Seq(
-          "-classpath",
-          compileCp
-            .map(_.path.toIO.getAbsolutePath())
-            .mkString(File.pathSeparator)
-        ),
-        when(!kotlin_1_0)(
-          "-language-version", kotlinVersion().split("[.]", 3).take(2).mkString("."),
-          "-api-version", kotlinVersion().split("[.]", 3).take(2).mkString(".")
-        ),
+        when(compileCp.nonEmpty)("-classpath", compileCp.mkString(File.pathSeparator)),
         kotlincOptions(),
         extraKotlinArgs,
         // parameters
@@ -198,7 +188,13 @@ trait KotlinModule extends JavaModule { outer =>
   /**
    * Additional Kotlin compiler options to be use by [[compile]].
    */
-  def kotlincOptions: T[Seq[String]] = T { Seq("-no-stdlib") }
+  def kotlincOptions: T[Seq[String]] = T {
+    when(!kotlinVersion().startsWith("1.0"))(
+      "-language-version", kotlinVersion().split("[.]", 3).take(2).mkString("."),
+      "-api-version", kotlinVersion().split("[.]", 3).take(2).mkString(".")
+    ) ++
+      Seq("-no-stdlib")
+  }
 
   /**
    * A test sub-module linked to its parent module best suited for unit-tests.
