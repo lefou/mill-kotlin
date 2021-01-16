@@ -204,7 +204,7 @@ trait KotlinModule extends JavaModule { outer =>
         "-language-version", kotlinVersion().split("[.]", 3).take(2).mkString("."),
         "-api-version", kotlinVersion().split("[.]", 3).take(2).mkString(".")
       )
-    }
+  }
 
   /**
    * A test sub-module linked to its parent module best suited for unit-tests.

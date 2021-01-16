@@ -15,6 +15,9 @@ object main extends KotlinModule {
 
   def kotlinVersion = "1.4.0"
 
+  override def kotlincOptions = super.kotlincOptions() ++ Seq("-jvm-target", "1.8")
+  override def javacOptions = super.javacOptions() ++ Seq("-source", "8", "-target", "8")
+
   def mainClass = Some("hello.JavaHello")
 
   object test extends Tests {
@@ -25,8 +28,6 @@ object main extends KotlinModule {
       ivy"org.jetbrains.kotlin:kotlin-test-junit:${kotlinVersion()}"
     )
   }
-
-  def kotlincOptions = Seq("-verbose")
 
 }
 
