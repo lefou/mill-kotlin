@@ -1,8 +1,6 @@
 on: [push, pull_request]
 
 env:
-  PUBLISH_OS: ubuntu-latest
-  PUBLISH_JAVA_VERSION: 1.8
   PUBLISH_BRANCH: refs/heads/main
 
 jobs: 
@@ -45,7 +43,7 @@ jobs:
   publish:
     needs: build
 
-    runs-on: ${{ env.PUBLISH_OS }}
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v2
@@ -54,7 +52,7 @@ jobs:
 
       - uses: actions/setup-java@v1
         with:
-          java-version: ${{ env.PUBLISH_JAVA_VERSION }}
+          java-version: 1.8
 
       - run: ./millw -i __.publishLocal $(pwd)/testRepo
 
