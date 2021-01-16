@@ -45,7 +45,7 @@ jobs:
   publish:
     needs: build
 
-    runs-on: ${{ PUBLISH_OS }}
+    runs-on: ${{ env.PUBLISH_OS }}
 
     steps:
       - uses: actions/checkout@v2
@@ -54,7 +54,7 @@ jobs:
 
       - uses: actions/setup-java@v1
         with:
-          java-version: ${{ PUBLISH_JAVA_VERSION }}
+          java-version: ${{ env.PUBLISH_JAVA_VERSION }}
 
       - run: ./millw -i __.publishLocal $(pwd)/testRepo
 
