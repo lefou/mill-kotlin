@@ -199,12 +199,12 @@ trait KotlinModule extends JavaModule { outer =>
    * Additional Kotlin compiler options to be use by [[compile]].
    */
   def kotlincOptions: T[Seq[String]] = T {
-    when(!kotlinVersion().startsWith("1.0"))(
-      "-language-version", kotlinVersion().split("[.]", 3).take(2).mkString("."),
-      "-api-version", kotlinVersion().split("[.]", 3).take(2).mkString(".")
-    ) ++
-      Seq("-no-stdlib")
-  }
+    Seq("-no-stdlib") ++
+      when(!kotlinVersion().startsWith("1.0"))(
+        "-language-version", kotlinVersion().split("[.]", 3).take(2).mkString("."),
+        "-api-version", kotlinVersion().split("[.]", 3).take(2).mkString(".")
+      )
+    }
 
   /**
    * A test sub-module linked to its parent module best suited for unit-tests.

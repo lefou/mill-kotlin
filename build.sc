@@ -16,10 +16,10 @@ import mill.scalalib.publish._
 
 trait Deps {
   def kotlinVersion = "1.3.61"
-  def millPlatform = "0.9"
-  def millVersion = "0.9.3"
-  def scalaVersion = "2.13.4"
-  def testWithMill = Seq("0.9.3")
+  def millPlatform: String
+  def millVersion: String
+  def scalaVersion: String
+  def testWithMill: Seq[String]
 
   val kotlinCompiler = ivy"org.jetbrains.kotlin:kotlin-compiler:${kotlinVersion}"
   val logbackClassic = ivy"ch.qos.logback:logback-classic:1.1.3"
@@ -32,7 +32,12 @@ trait Deps {
   val slf4j = ivy"org.slf4j:slf4j-api:1.7.25"
   val utilsFunctional = ivy"de.tototec:de.tototec.utils.functional:2.0.1"
 }
-object Deps_0_9 extends Deps
+object Deps_0_9 extends Deps {
+  override def millVersion = "0.9.3"
+  override def millPlatform = "0.9"
+  override def scalaVersion = "2.13.4"
+  override def testWithMill = Seq("0.9.4", "0.9.3")
+}
 object Deps_0_7 extends Deps {
   override def millVersion = "0.7.0"
   override def millPlatform = "0.7"
@@ -155,6 +160,15 @@ class ItestCross(millItestVersion: String) extends MillIntegrationTestModule {
   override def pluginsUnderTest = Seq(main(millPlatform))
   override def temporaryIvyModules = Seq(api(millPlatform), worker(millPlatform))
   override def testTargets: T[Seq[String]] = T{ Seq("-d", "verify") }
+
+  override def testCases: T[Seq[PathRef]] = T{
+    super.testCases().
+      filter { tc =>
+        sys.props("java.version").startsWith("1.8") ||
+          (!sys.props("java.version").startsWith("1.") &&
+            !Seq("kotlin-1.0", "kotlin-1.1", "kotlin-1.2").exists(suffix => tc.path.last.endsWith(suffix)))
+      }
+  }
 
   override def temporaryIvyModulesDetails: Task.Sequence[(PathRef, (PathRef, (PathRef, (PathRef, (PathRef, Artifact)))))] =
     Target.traverse(temporaryIvyModules) { p =>
