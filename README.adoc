@@ -36,7 +36,7 @@ object main extends KotlinModule {
 
   // Set additional Kotlin compiler options, e.g. the language level and annotation processor
   // Run `mill main.kotlincHelp` to get a list of supported options
-  def kotlincOptions = Seq("-verbose")
+  def kotlincOptions = super.kotlincOptions() ++ Seq("-verbose")
 
 }
 ----
