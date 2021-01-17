@@ -70,11 +70,11 @@ trait KotlinModule extends JavaModule { outer =>
   def kotlinCompilerIvyDeps: T[Agg[Dep]] = T{
     Agg(ivy"${Versions.millKotlinWorkerImplIvyDep}") ++
       Agg(ivy"org.jetbrains.kotlin:kotlin-compiler:${kotlinCompilerVersion()}") ++
-      (
-        if (Seq("1.0.", "1.1.", "1.2").exists(prefix => kotlinVersion().startsWith(prefix)))
-          Agg(ivy"org.jetbrains.kotlin:kotlin-runtime:${kotlinCompilerVersion()}")
-        else Seq()
-      ) ++
+//      (
+//        if (Seq("1.0.", "1.1.", "1.2").exists(prefix => kotlinVersion().startsWith(prefix)))
+//          Agg(ivy"org.jetbrains.kotlin:kotlin-runtime:${kotlinCompilerVersion()}")
+//        else Seq()
+//      ) ++
       (
         if (!Seq("1.0.", "1.1.", "1.2.0", "1.2.1", "1.2.2", "1.2.3", "1.2.4").exists(prefix => kotlinVersion().startsWith(prefix)))
           Agg(ivy"org.jetbrains.kotlin:kotlin-scripting-compiler:${kotlinCompilerVersion()}")

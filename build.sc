@@ -15,7 +15,7 @@ import mill.scalalib._
 import mill.scalalib.publish._
 
 trait Deps {
-  def kotlinVersion = "1.3.61"
+  def kotlinVersion = "1.0.0"
   def millPlatform: String
   def millVersion: String
   def scalaVersion: String
@@ -164,9 +164,10 @@ class ItestCross(millItestVersion: String) extends MillIntegrationTestModule {
   override def testCases: T[Seq[PathRef]] = T{
     super.testCases().
       filter { tc =>
-        sys.props("java.version").startsWith("1.8") ||
-          (!sys.props("java.version").startsWith("1.") &&
-            !Seq("kotlin-1.0", "kotlin-1.1", "kotlin-1.2").exists(suffix => tc.path.last.endsWith(suffix)))
+//        sys.props("java.version").startsWith("1.8") ||
+//          (!sys.props("java.version").startsWith("1.") &&
+            !Seq("kotlin-1.0", "kotlin-1.1", "kotlin-1.2").exists(suffix => tc.path.last.endsWith(suffix))
+//        )
       }
   }
 
