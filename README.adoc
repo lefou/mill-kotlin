@@ -1,7 +1,7 @@
 = mill-kotlin - Kotlin compiler support for mill
-:version: 0.1.1
+:version: 0.2.0
 :mill-platform: 0.9
-:kotlinVersion: 1.3.61
+:kotlinVersion: 1.4.21
 :projectHome: https://github.com/lefou/mill-kotlin
 :min-mill-version: 0.6.0
 :toc:
@@ -45,7 +45,7 @@ object main extends KotlinModule {
 
 To target the JVM (kotlin-jvm), our module needs to extend `de.tobiasroeser.mill.kotlin.KotlinModule` which itself extends `mill.scalalib.JavaModule`.
 
-For convenience, you may derive your unit test projects from `de.tobiasroeser.mill.kotlin.KotlinModule.Tests` trait.
+For convenience, you may derive your unit test projects from `de.tobiasroeser.mill.kotlin.KotlinModule.Tests` (or `KotlinModuleTests`) trait.
 
 The module trait `de.tobiasroeser.mill.kotlin.KotlinModule` has the following configuration options (over those from `mill.scalalib.JavaModule`).
 
@@ -79,6 +79,8 @@ The module trait `de.tobiasroeser.mill.kotlin.KotlinModule` has the following co
 `trait Tests extends TestModule with KotlinTestModule`::
   A test sub-module linked to its parent module best suited for unit-tests.
 
+Mixed Kotlin/Java projects are also supported. Java compilation is based on mills `mill.scalalib.JavaModule` and Java options are configured via `javacOptions`.
+
 == Version Compatibility Matrix
 
 Mill is still in active development, and has no stable API yet.
@@ -90,7 +92,8 @@ The following table shows a matrix of compatible mill and mill-kotlin versions.
 [options="header"]
 |===
 | mill-kotlin | mill
-| 0.1.1 | 0.6.0 - 0.9.3
+| 0.2.0 | 0.6.0 - 0.9.4
+| 0.1.1 | 0.6.0 - 0.9.4
 | 0.1.0 | 0.6.0 - 0.8.0
 | 0.0.3 | 0.6.0 - 0.6.1
 | 0.0.2 | 0.5.7
@@ -149,14 +152,27 @@ Contributing::
 == Changelog
 
 === master
-:version: main
-:prev-version: 0.1.1
+:version: after-0.2.0
+:prev-version: 0.2.0
 :github-milestone: 4
 
+_See
+ifeval::["{github-milestone}" != ""]
+https://github.com/lefou/mill-kotlin/milestone/{github-milestone}?closed=1[milstone {version}]
+and the
+endif::[]
+https://github.com/lefou/mill-kotlin/compare/{prev-version}...{version}[list of commits]_
+
+
+=== mill-kotlin 0.2.0 - 2020-01-17
+:version: 0.2.0
+:prev-version: 0.1.1
+:github-milestone:
+
 * Overall fixes and improvements
-* Enhanced integration test setup
-* Proper support for Kotlin 1.3 and 1.4.
-* Limited support for Kotlin 1.0, 1.1 and 1.2.
+* Enhanced integration test setup to detect Kotlin version differences
+* Proper support for Kotlin 1.3 and 1.4
+* Limited support for older Kotlin 1.0, 1.1 and 1.2
 +
 _These versions may work for you, but I haven't found a stable integration test setup that works reliable for all these Kotlin releases on different platforms and different Java versions.
  If you know what you're doing, all integration points are configurable, so these versions should work after same tweaking.
@@ -169,14 +185,13 @@ and the
 endif::[]
 https://github.com/lefou/mill-kotlin/compare/{prev-version}...{version}[list of commits]_
 
-* Support for mill API 0.9.3
-* Introduced artifact suffix indicating the mill platform (e.g. `mill0.9`)
-
 === mill-kotlin 0.1.1 - 2020-12-01
 :version: 0.1.1
 :prev-version: 0.1.0
 :github-milestone: 3
 
+* Support for mill API 0.9.3
+* Introduced artifact suffix indicating the mill platform (e.g. `mill0.9`)
 
 _See
 ifeval::["{github-milestone}" != ""]
