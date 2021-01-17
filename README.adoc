@@ -153,7 +153,14 @@ Contributing::
 :prev-version: 0.1.1
 :github-milestone: 4
 
-* Fixes and improvements
+* Overall fixes and improvements
+* Enhanced integration test setup
+* Proper support for Kotlin 1.3 and 1.4.
+* Limited support for Kotlin 1.0, 1.1 and 1.2.
++
+_These versions may work for you, but I haven't found a stable integration test setup that works reliable for all these Kotlin releases on different platforms and different Java versions.
+ If you know what you're doing, all integration points are configurable, so these versions should work after same tweaking.
+ Feedback and pull requests are highly appreciated._
 
 _See
 ifeval::["{github-milestone}" != ""]
