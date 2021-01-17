@@ -164,7 +164,7 @@ endif::[]
 https://github.com/lefou/mill-kotlin/compare/{prev-version}...{version}[list of commits]_
 
 
-=== mill-kotlin 0.2.0 - 2020-01-17
+=== mill-kotlin 0.2.0 - 2021-01-17
 :version: 0.2.0
 :prev-version: 0.1.1
 :github-milestone:
