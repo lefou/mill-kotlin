@@ -183,7 +183,7 @@ ifeval::["{github-milestone}" != ""]
 https://github.com/lefou/mill-kotlin/milestone/{github-milestone}?closed=1[milstone {version}]
 and the
 endif::[]
-https://github.com/lefou/mill-kotlin/compare/{prev-version}...{version}[list of commits]_
+https://github.com/lefou/mill-kotlin/compare/{prev-version}\...{version}[list of commits]_
 
 === mill-kotlin 0.1.1 - 2020-12-01
 :version: 0.1.1
@@ -198,7 +198,7 @@ ifeval::["{github-milestone}" != ""]
 https://github.com/lefou/mill-kotlin/milestone/{github-milestone}?closed=1[milstone {version}]
 and the
 endif::[]
-https://github.com/lefou/mill-kotlin/compare/{prev-version}...{version}[list of commits]_
+https://github.com/lefou/mill-kotlin/compare/{prev-version}\...{version}[list of commits]_
 
 === mill-kotlin 0.1.0 - 2020-06-30
 :version: 0.1.0
@@ -212,7 +212,7 @@ ifeval::["{github-milestone}" != ""]
 https://github.com/lefou/mill-kotlin/milestone/{github-milestone}?closed=1[milstone {version}]
 and the
 endif::[]
-https://github.com/lefou/mill-kotlin/compare/{prev-version}...{version}[list of commits]_
+https://github.com/lefou/mill-kotlin/compare/{prev-version}\...{version}[list of commits]_
 
 
 === mill-kotlin 0.0.3 - 2020-02-25
@@ -227,7 +227,7 @@ ifeval::["{github-milestone}" != ""]
 https://github.com/lefou/mill-kotlin/milestone/{github-milestone}?closed=1[milstone {version}]
 and the
 endif::[]
-https://github.com/lefou/mill-kotlin/compare/{prev-version}...{version}[list of commits]_
+https://github.com/lefou/mill-kotlin/compare/{prev-version}\...{version}[list of commits]_
 
 
 === mill-kotlin 0.0.2 - 2020-02-25
@@ -242,7 +242,7 @@ ifeval::["{github-milestone}" != ""]
 https://github.com/lefou/mill-kotlin/milestone/{github-milestone}?closed=1[milstone {version}]
 and the
 endif::[]
-https://github.com/lefou/mill-kotlin/compare/{prev-version}...{version}[list of commits]_
+https://github.com/lefou/mill-kotlin/compare/{prev-version}\...{version}[list of commits]_
 
 === mill-kotlin 0.0.1 - 2020-02-20
 :version: 0.0.1
@@ -256,4 +256,4 @@ ifeval::["{github-milestone}" != ""]
 https://github.com/lefou/mill-kotlin/milestone/{github-milestone}?closed=1[milstone {version}]
 and the
 endif::[]
-https://github.com/lefou/mill-kotlin/compare/{prev-version}...{version}[list of commits]_
+https://github.com/lefou/mill-kotlin/compare/{prev-version}\...{version}[list of commits]_
