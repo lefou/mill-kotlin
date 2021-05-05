@@ -161,7 +161,7 @@ ifeval::["{github-milestone}" != ""]
 https://github.com/lefou/mill-kotlin/milestone/{github-milestone}?closed=1[milstone {version}]
 and the
 endif::[]
-https://github.com/lefou/mill-kotlin/compare/{prev-version}...{version}[list of commits]_
+https://github.com/lefou/mill-kotlin/compare/{prev-version}\...{version}[list of commits]_
 
 
 === mill-kotlin 0.2.0 - 2021-01-17
