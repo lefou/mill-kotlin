@@ -1,5 +1,5 @@
 import $exec.plugins
-import $ivy.`org.scoverage::scalac-scoverage-runtime:1.4.1`
+import $ivy.`org.scoverage::scalac-scoverage-runtime:1.4.6`
 
 import mill._
 import mill.scalalib._

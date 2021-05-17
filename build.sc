@@ -28,7 +28,7 @@ trait Deps {
   val millScalalib = ivy"com.lihaoyi::mill-scalalib:${millVersion}"
   val osLib = ivy"com.lihaoyi::os-lib:0.6.3"
   val scalaTest = ivy"org.scalatest::scalatest:3.2.3"
-  val scoverageVersion = "1.4.1"
+  val scoverageVersion = "1.4.6"
   val slf4j = ivy"org.slf4j:slf4j-api:1.7.25"
   val utilsFunctional = ivy"de.tototec:de.tototec.utils.functional:2.0.1"
 }
@@ -71,6 +71,10 @@ trait MillKotlinModule extends CrossScalaModule with PublishModule with Scoverag
   override def javacOptions = Seq("-source", "1.8", "-target", "1.8", "-encoding", "UTF-8")
   override def scalacOptions = Seq("-target:jvm-1.8", "-encoding", "UTF-8")
   override def scoverageVersion = deps.scoverageVersion
+  // we need to adapt to changed publishing policy - patch-level
+  override def scoveragePluginDep = T {
+    ivy"org.scoverage:::scalac-scoverage-plugin:${scoverageVersion()}"
+  }
 
   def pomSettings = T {
     PomSettings(
