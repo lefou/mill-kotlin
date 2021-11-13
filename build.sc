@@ -1,5 +1,5 @@
 // mill plugins
-import $ivy.`de.tototec::de.tobiasroeser.mill.integrationtest::0.4.1`
+import $ivy.`de.tototec::de.tobiasroeser.mill.integrationtest::0.4.1-22-32e55a`
 import $ivy.`de.tototec::de.tobiasroeser.mill.vcs.version::0.1.2`
 import $ivy.`com.lihaoyi::mill-contrib-scoverage:$MILL_VERSION`
 
