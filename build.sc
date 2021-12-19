@@ -66,7 +66,6 @@ val millItestVersions = millApiVersions.flatMap { case (_, d) => d.testWithMill.
 
 val baseDir = build.millSourcePath
 
-
 trait MillKotlinModule extends CrossScalaModule with PublishModule with ScoverageModule {
   def millPlatform: String
   def deps: Deps = millApiVersions.toMap.apply(millPlatform)
@@ -99,21 +98,25 @@ trait MillKotlinModule extends CrossScalaModule with PublishModule with Scoverag
 object api extends Cross[ApiCross](millApiVersions.map(_._1): _*)
 class ApiCross(override val millPlatform: String) extends MillKotlinModule {
   override def artifactName = T { "de.tobiasroeser.mill.kotlin-api" }
-  override def compileIvyDeps: T[Loose.Agg[Dep]] = T{ Agg(
-    deps.millMainApi,
-    deps.osLib
-  )}
+  override def compileIvyDeps: T[Loose.Agg[Dep]] = T {
+    Agg(
+      deps.millMainApi,
+      deps.osLib
+    )
+  }
 }
 
 object worker extends Cross[WorkerCross](millApiVersions.map(_._1): _*)
 class WorkerCross(override val millPlatform: String) extends MillKotlinModule {
   override def artifactName = T { "de.tobiasroeser.mill.kotlin-worker" }
   override def moduleDeps: Seq[PublishModule] = Seq(api(millPlatform))
-  override def compileIvyDeps: T[Loose.Agg[Dep]] = T{ Agg(
-    deps.osLib,
-    deps.millMainApi,
-    deps.kotlinCompiler
-  )}
+  override def compileIvyDeps: T[Loose.Agg[Dep]] = T {
+    Agg(
+      deps.osLib,
+      deps.millMainApi,
+      deps.kotlinCompiler
+    )
+  }
 }
 
 object main extends Cross[MainCross](millApiVersions.map(_._1): _*)
@@ -135,33 +138,35 @@ class MainCross(override val millPlatform: String) extends MillKotlinModule {
     def testFrameworks = Seq("org.scalatest.tools.Framework")
   }
 
-  override def generatedSources: Target[Seq[PathRef]] = T{
+  override def generatedSources: Target[Seq[PathRef]] = T {
     super.generatedSources() :+ versionFile()
   }
 
-  def versionFile: Target[PathRef] = T{
+  def versionFile: Target[PathRef] = T {
     val dest = T.ctx().dest
     val body =
       s"""package de.tobiasroeser.mill.kotlin
-        |
-        |/**
-        | * Build-time generated versions file.
-        | */
-        |object Versions {
-        |  /** The mill-kotlin version. */
-        |  val millKotlinVersion = "${publishVersion()}"
-        |  /** The mill API version used to build mill-kotlin. */
-        |  val buildTimeMillVersion = "${deps.millVersion}"
-        |  /** The ivy dependency holding the mill kotlin worker impl. */
-        |  val millKotlinWorkerImplIvyDep = "${worker(millPlatform).pomSettings().organization}:${worker(millPlatform).artifactId()}:${worker(millPlatform).publishVersion()}"
-        |  /** The default kotlin version used for the compiler. */
-        |  val kotlinCompilerVersion = "${deps.kotlinVersion}"
-        |}
-        |""".stripMargin
+         |
+         |/**
+         | * Build-time generated versions file.
+         | */
+         |object Versions {
+         |  /** The mill-kotlin version. */
+         |  val millKotlinVersion = "${publishVersion()}"
+         |  /** The mill API version used to build mill-kotlin. */
+         |  val buildTimeMillVersion = "${deps.millVersion}"
+         |  /** The ivy dependency holding the mill kotlin worker impl. */
+         |  val millKotlinWorkerImplIvyDep = "${worker(millPlatform).pomSettings().organization}:${worker(
+        millPlatform
+      ).artifactId()}:${worker(millPlatform).publishVersion()}"
+         |  /** The default kotlin version used for the compiler. */
+         |  val kotlinCompilerVersion = "${deps.kotlinVersion}"
+         |}
+         |""".stripMargin
 
     os.write(dest / "Versions.scala", body)
     PathRef(dest)
-}
+  }
 
 }
 
@@ -172,19 +177,19 @@ class ItestCross(millItestVersion: String) extends MillIntegrationTestModule {
   override def millTestVersion = millItestVersion
   override def pluginsUnderTest = Seq(main(millPlatform))
   override def temporaryIvyModules = Seq(api(millPlatform), worker(millPlatform))
-  override def testTargets: T[Seq[String]] = T{ Seq("-d", "verify") }
+  override def testTargets: T[Seq[String]] = T { Seq("-d", "verify") }
 
-  override def testCases: T[Seq[PathRef]] = T{
-    super.testCases().
-      filter { tc =>
+  override def testCases: T[Seq[PathRef]] = T {
+    super.testCases().filter { tc =>
 //        sys.props("java.version").startsWith("1.8") ||
 //          (!sys.props("java.version").startsWith("1.") &&
-            !Seq("kotlin-1.0", "kotlin-1.1", "kotlin-1.2").exists(suffix => tc.path.last.endsWith(suffix))
+      !Seq("kotlin-1.0", "kotlin-1.1", "kotlin-1.2").exists(suffix => tc.path.last.endsWith(suffix))
 //        )
-      }
+    }
   }
 
-  override def temporaryIvyModulesDetails: Task.Sequence[(PathRef, (PathRef, (PathRef, (PathRef, (PathRef, Artifact)))))] =
+  override def temporaryIvyModulesDetails
+      : Task.Sequence[(PathRef, (PathRef, (PathRef, (PathRef, (PathRef, Artifact)))))] =
     Target.traverse(temporaryIvyModules) { p =>
       val jar = p match {
         case p: ScoverageModule => p.scoverage.jar
