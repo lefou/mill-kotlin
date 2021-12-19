@@ -2,6 +2,7 @@
 import $ivy.`de.tototec::de.tobiasroeser.mill.integrationtest::0.4.1-22-32e55a`
 import $ivy.`de.tototec::de.tobiasroeser.mill.vcs.version::0.1.2`
 import $ivy.`com.lihaoyi::mill-contrib-scoverage:$MILL_VERSION`
+import mill.define.{Command, TaskModule}
 
 // imports
 import de.tobiasroeser.mill.integrationtest._
@@ -165,7 +166,11 @@ class MainCross(override val millPlatform: String) extends MillKotlinModule {
 
 }
 
-object itest extends Cross[ItestCross](millItestVersions.map(_._1): _*)
+object itest extends Cross[ItestCross](millItestVersions.map(_._1): _*) with TaskModule {
+  override def defaultCommandName(): String = "test"
+  def testCached: T[Seq[TestCase]] = itest(millItestVersions.map(_._1).head).testCached
+  def test(args: String*): Command[Seq[TestCase]] = itest(millItestVersions.map(_._1).head).test()
+}
 class ItestCross(millItestVersion: String) extends MillIntegrationTestModule {
   val millPlatform = millItestVersions.toMap.apply(millItestVersion).millPlatform
   override def millSourcePath: os.Path = super.millSourcePath / os.up
