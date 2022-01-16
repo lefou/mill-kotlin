@@ -1,5 +1,5 @@
 = mill-kotlin - Kotlin compiler support for mill
-:version: 0.2.1
+:version: 0.2.2
 :mill-platform: 0.10
 :kotlinVersion: 1.4.21
 :projectHome: https://github.com/lefou/mill-kotlin
@@ -92,7 +92,8 @@ The following table shows a matrix of compatible mill and mill-kotlin versions.
 [options="header"]
 |===
 | mill-kotlin | mill
-| 0.2.1 | 0.6.0 - 0.10.x
+| 0.2.2 | 0.6.0 - 0.10.x
+| 0.2.1 | 0.6.0 - 0.9.x
 | 0.2.0 | 0.6.0 - 0.9.x
 | 0.1.1 | 0.6.0 - 0.9.6
 | 0.1.0 | 0.6.0 - 0.8.0
@@ -155,8 +156,24 @@ Contributing::
 
 === main branch
 :version: main
+:prev-version: 0.2.2
+:github-milestone: 6
+
+
+_See
+ifeval::["{github-milestone}" != ""]
+https://github.com/lefou/mill-kotlin/milestone/{github-milestone}?closed=1[milstone {version}]
+and the
+endif::[]
+https://github.com/lefou/mill-kotlin/compare/{prev-version}\...{version}[list of commits]_
+
+
+=== mill-kotlin 0.2.2 - 2022-01-16
+:version: main
 :prev-version: 0.2.1
 :github-milestone: 5
+
+* Support for newer Mill versions including 0.10.0
 
 _See
 ifeval::["{github-milestone}" != ""]
@@ -171,7 +188,6 @@ https://github.com/lefou/mill-kotlin/compare/{prev-version}\...{version}[list of
 :prev-version: 0.2.0
 :github-milestone: 4
 
-* Support for newer Mill versions including 0.10.0
 * Improved integration test suite
 * Various dependency version updates
 
