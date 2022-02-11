@@ -67,7 +67,7 @@ trait KotlinModule extends JavaModule { outer =>
    * The Ivy/Coursier dependencies resembling the Kotlin compiler.
    * Default is derived from [[kotlinCompilerVersion]].
    */
-  def kotlinCompilerIvyDeps: T[Agg[Dep]] = T{
+  def kotlinCompilerIvyDeps: T[Agg[Dep]] = T {
     Agg(ivy"${Versions.millKotlinWorkerImplIvyDep}") ++
       Agg(ivy"org.jetbrains.kotlin:kotlin-compiler:${kotlinCompilerVersion()}") ++
 //      (
@@ -76,14 +76,17 @@ trait KotlinModule extends JavaModule { outer =>
 //        else Seq()
 //      ) ++
       (
-        if (!Seq("1.0.", "1.1.", "1.2.0", "1.2.1", "1.2.2", "1.2.3", "1.2.4").exists(prefix => kotlinVersion().startsWith(prefix)))
+        if (
+          !Seq("1.0.", "1.1.", "1.2.0", "1.2.1", "1.2.2", "1.2.3", "1.2.4").exists(prefix =>
+            kotlinVersion().startsWith(prefix)
+          )
+        )
           Agg(ivy"org.jetbrains.kotlin:kotlin-scripting-compiler:${kotlinCompilerVersion()}")
         else Seq()
       )
 //    ivy"org.jetbrains.kotlin:kotlin-scripting-compiler-impl:${kotlinCompilerVersion()}",
 //    ivy"org.jetbrains.kotlin:kotlin-scripting-common:${kotlinCompilerVersion()}",
   }
-
 
   /**
    * The Java classpath resembling the Kotlin compiler.
@@ -94,16 +97,21 @@ trait KotlinModule extends JavaModule { outer =>
   }
 
   def kotlinWorker: Worker[KotlinWorker] = T.worker {
-    val cl = new URLClassLoader(kotlinCompilerClasspath().map(_.path.toIO.toURI().toURL()).toArray[URL], getClass().getClassLoader())
-    val className = classOf[KotlinWorker].getPackage().getName() + ".impl." + classOf[KotlinWorker].getSimpleName() + "Impl"
+    val cl = new URLClassLoader(
+      kotlinCompilerClasspath().map(_.path.toIO.toURI().toURL()).toArray[URL],
+      getClass().getClassLoader()
+    )
+    val className =
+      classOf[KotlinWorker].getPackage().getName() + ".impl." + classOf[KotlinWorker].getSimpleName() + "Impl"
     val impl = cl.loadClass(className)
     val worker = impl.newInstance().asInstanceOf[KotlinWorker]
-    if(worker.getClass().getClassLoader() != cl) {
+    if (worker.getClass().getClassLoader() != cl) {
       T.ctx().log.error(
         """Worker not loaded from worker classloader.
-          |You should not add the mill-kotlin-worker JAR to the mill build classpath""".stripMargin)
+          |You should not add the mill-kotlin-worker JAR to the mill build classpath""".stripMargin
+      )
     }
-    if(worker.getClass().getClassLoader() == classOf[KotlinWorker].getClassLoader()) {
+    if (worker.getClass().getClassLoader() == classOf[KotlinWorker].getClassLoader()) {
       T.ctx().log.error("Worker classloader used to load interface and implementation")
     }
     worker
@@ -125,7 +133,7 @@ trait KotlinModule extends JavaModule { outer =>
     ()
   }
 
-  protected def when(cond: Boolean)(args: String*): Seq[String] = if(cond) args else Seq()
+  protected def when(cond: Boolean)(args: String*): Seq[String] = if (cond) args else Seq()
 
   /**
    * The actual Kotlin compile task (used by [[compile]] and [[kotlincHelp]].
@@ -136,35 +144,42 @@ trait KotlinModule extends JavaModule { outer =>
     val classes = dest / "classes"
     os.makeDir.all(classes)
 
-    val isKotlin = allKotlinSourceFiles().nonEmpty
-    val isJava = allJavaSourceFiles().nonEmpty
+    val javaSourceFiles = allJavaSourceFiles().map(_.path)
+    val kotlinSourceFiles = allKotlinSourceFiles().map(_.path)
+
+    val isKotlin = kotlinSourceFiles.nonEmpty
+    val isJava = javaSourceFiles.nonEmpty
     val isMixed = isKotlin && isJava
 
-    val counts = Seq("Kotlin" -> allKotlinSourceFiles().size, "Java" -> allJavaSourceFiles().size)
-    ctx.log.info(s"Compiling ${counts.filter(_._2 > 0).map{ case (n,c) => s"$c $n" }.mkString(" and ")} sources to ${classes} ...")
+    val counts = Seq("Kotlin" -> kotlinSourceFiles.size, "Java" -> javaSourceFiles.size)
+    ctx.log.info(
+      s"Compiling ${counts.filter(_._2 > 0).map { case (n, c) => s"$c $n" }.mkString(" and ")} sources to ${classes} ..."
+    )
 
     val compileCp = compileClasspath().map(_.path).filter(os.exists)
+    val updateCompileOutput = upstreamCompileOutput()
 
     def compileJava: Result[CompilationResult] = {
+      // The compile step is lazy, but it's dependencies are not!
       zincWorker.worker().compileJava(
-        upstreamCompileOutput(),
-        allJavaSourceFiles().map(_.path),
-        compileClasspath().map(_.path),
+        updateCompileOutput,
+        javaSourceFiles,
+        compileCp,
         javacOptions(),
         ctx.reporter(hashCode)
       )
     }
 
-    if(isMixed || isKotlin) {
+    if (isMixed || isKotlin) {
       val compilerArgs: Seq[String] = Seq(
         // destdir
         Seq("-d", classes.toIO.getAbsolutePath()),
         // classpath
-        when(compileCp.nonEmpty)("-classpath", compileCp.mkString(File.pathSeparator)),
+        when(compileCp.iterator.nonEmpty)("-classpath", compileCp.iterator.mkString(File.pathSeparator)),
         kotlincOptions(),
         extraKotlinArgs,
         // parameters
-        (allKotlinSourceFiles() ++ allJavaSourceFiles()).map(_.path.toIO.getAbsolutePath())
+        (kotlinSourceFiles ++ javaSourceFiles).map(_.toIO.getAbsolutePath())
       ).flatten
 
       val workerResult = kotlinWorker().compile(compilerArgs: _*)
@@ -178,12 +193,12 @@ trait KotlinModule extends JavaModule { outer =>
           if (!isJava) {
             // pure Kotlin project
             cr
-          }
-          else {
-            // also run Java compiler
+          } else {
+            // also run Java compiler and use it's returned result
             compileJava
           }
-        case Result.Failure(reason, _) => Result.Failure(reason, Some(CompilationResult(analysisFile, PathRef(classes))))
+        case Result.Failure(reason, _) =>
+          Result.Failure(reason, Some(CompilationResult(analysisFile, PathRef(classes))))
         case e: Result.Exception => e
         case Result.Aborted => Result.Aborted
         case Result.Skipped => Result.Skipped
@@ -201,8 +216,10 @@ trait KotlinModule extends JavaModule { outer =>
   def kotlincOptions: T[Seq[String]] = T {
     Seq("-no-stdlib") ++
       when(!kotlinVersion().startsWith("1.0"))(
-        "-language-version", kotlinVersion().split("[.]", 3).take(2).mkString("."),
-        "-api-version", kotlinVersion().split("[.]", 3).take(2).mkString(".")
+        "-language-version",
+        kotlinVersion().split("[.]", 3).take(2).mkString("."),
+        "-api-version",
+        kotlinVersion().split("[.]", 3).take(2).mkString(".")
       )
   }
 
@@ -210,12 +227,10 @@ trait KotlinModule extends JavaModule { outer =>
    * A test sub-module linked to its parent module best suited for unit-tests.
    */
   trait KotlinModuleTests extends super.Tests with KotlinTestModule {
-    override def kotlinVersion: T[String] = T{ outer.kotlinVersion() }
-    override def kotlinCompilerVersion: T[String] = T{ outer.kotlinCompilerVersion() }
-    override def kotlincOptions: T[Seq[String]] = T{ outer.kotlincOptions() }
+    override def kotlinVersion: T[String] = T { outer.kotlinVersion() }
+    override def kotlinCompilerVersion: T[String] = T { outer.kotlinCompilerVersion() }
+    override def kotlincOptions: T[Seq[String]] = T { outer.kotlincOptions() }
   }
   trait Tests extends KotlinModuleTests
 
 }
-
-
