@@ -3,7 +3,7 @@
 :mill-platform: 0.10
 :kotlinVersion: 1.4.21
 :projectHome: https://github.com/lefou/mill-kotlin
-:min-mill-version: 0.6.0
+:min-mill-version: 0.7.0
 :toc:
 :toc-placement: preamble
 
@@ -120,7 +120,6 @@ Please make sure to use the correct _mill platform suffix_ matching your used mi
 | 0.10.x        | 0.10 | `_mill0.10` | ```$ivy.`de.tototec::de.tobiasroeser.mill.kotlin::{version}````
 | 0.9.3 -       | 0.9  | `_mill0.9`  | ```$ivy.`de.tototec::de.tobiasroeser.mill.kotlin_mill0.9:{version}````
 | 0.7.0 - 0.8.0 | 0.7  | `_mill0.7`  | ```$ivy.`de.tototec::de.tobiasroeser.mill.kotlin_mill0.7:{version}````
-| 0.6.0 - 0.6.3 | 0.6  | `_mill0.6`  | ```$ivy.`de.tototec::de.tobiasroeser.mill.kotlin_mill0.6:{version}````
 |===
 
 

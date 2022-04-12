@@ -29,10 +29,6 @@ jobs:
           - "itest[0.7.2].test"
           - "itest[0.7.1].test"
           - "itest[0.7.0].test"
-          - "itest[0.6.3].test"
-          - "itest[0.6.2].test"
-          - "itest[0.6.1].test"
-          - "itest[0.6.0].test"
     runs-on: ${{ matrix.os }}
     continue-on-error: ${{ matrix.os == 'windows-latest' }}
 
