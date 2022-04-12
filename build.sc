@@ -37,7 +37,7 @@ object Deps_0_10 extends Deps {
   override def millPlatform = "0.10"
   override def scalaVersion = "2.13.8"
   // keep in sync with .github/workflows/build.yml
-  override def testWithMill = Seq(millVersion)
+  override def testWithMill = Seq("0.10.3", "0.10.2", "0.10.1", millVersion)
   override val osLib = ivy"com.lihaoyi::os-lib:0.8.0"
 }
 object Deps_0_9 extends Deps {
