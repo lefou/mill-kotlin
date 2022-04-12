@@ -54,13 +54,6 @@ object Deps_0_7 extends Deps {
   // keep in sync with .github/workflows/build.yml
   override def testWithMill = Seq("0.8.0", "0.7.4", "0.7.3", "0.7.2", "0.7.1", millVersion)
 }
-//object Deps_0_6 extends Deps {
-//  override def millVersion = "0.6.0"
-//  override def millPlatform = "0.6"
-//  override def scalaVersion = "2.12.15"
-//  // keep in sync with .github/workflows/build.yml
-//  override def testWithMill = Seq("0.6.3", "0.6.2", "0.6.1", millVersion)
-//}
 
 val millApiVersions = Seq(Deps_0_10, Deps_0_9, Deps_0_7).map(x => x.millPlatform -> x)
 
