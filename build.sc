@@ -1,16 +1,16 @@
 // mill plugins
-import $ivy.`de.tototec::de.tobiasroeser.mill.integrationtest::0.4.1-22-32e55a`
-import $ivy.`de.tototec::de.tobiasroeser.mill.vcs.version::0.1.2`
-import $ivy.`com.lihaoyi::mill-contrib-scoverage:$MILL_VERSION`
-import mill.define.{Command, TaskModule}
+import $ivy.`de.tototec::de.tobiasroeser.mill.integrationtest::0.6.1`
+import $ivy.`de.tototec::de.tobiasroeser.mill.vcs.version::0.2.0`
+import $ivy.`com.lihaoyi::mill-contrib-scoverage:`
 
 // imports
 import de.tobiasroeser.mill.integrationtest._
 import de.tobiasroeser.mill.vcs.version.VcsVersion
+
 import mill._
 import mill.api.Loose
 import mill.contrib.scoverage.ScoverageModule
-import mill.define.{Module, Target, Task}
+import mill.define.{Command, Module, TaskModule, Target, Task}
 import mill.main.Tasks
 import mill.scalalib._
 import mill.scalalib.publish._
