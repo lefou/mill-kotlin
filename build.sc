@@ -171,6 +171,8 @@ object itest extends Cross[ItestCross](millItestVersions.map(_._1): _*) with Tas
 }
 class ItestCross(millItestVersion: String) extends MillIntegrationTestModule {
   val millPlatform = millItestVersions.toMap.apply(millItestVersion).millPlatform
+  def deps: Deps = millApiVersions.toMap.apply(millPlatform)
+
   override def millSourcePath: os.Path = super.millSourcePath / os.up
   override def millTestVersion = millItestVersion
   override def pluginsUnderTest = Seq(main(millPlatform))
@@ -203,6 +205,19 @@ class ItestCross(millItestVersion: String) extends MillIntegrationTestModule {
       }
       jar zip (p.sourceJar zip (p.docJar zip (p.pom zip (p.ivy zip p.artifactMetadata))))
     }
+
+  override def perTestResources = T.sources {
+    Seq(generatedSharedSrc())
+  }
+
+  def generatedSharedSrc = T {
+    os.write(
+      T.dest / "shared.sc",
+      s"""import $$ivy.`org.scoverage::scalac-scoverage-runtime:${deps.scoverageVersion}`
+         |""".stripMargin
+    )
+    PathRef(T.dest)
+  }
 }
 
 object P extends Module {
