@@ -1,16 +1,16 @@
 // mill plugins
-import $ivy.`de.tototec::de.tobiasroeser.mill.integrationtest::0.4.1-22-32e55a`
-import $ivy.`de.tototec::de.tobiasroeser.mill.vcs.version::0.1.2`
-import $ivy.`com.lihaoyi::mill-contrib-scoverage:$MILL_VERSION`
-import mill.define.{Command, TaskModule}
+import $ivy.`de.tototec::de.tobiasroeser.mill.integrationtest::0.6.1`
+import $ivy.`de.tototec::de.tobiasroeser.mill.vcs.version::0.2.0`
+import $ivy.`com.lihaoyi::mill-contrib-scoverage:`
 
 // imports
 import de.tobiasroeser.mill.integrationtest._
 import de.tobiasroeser.mill.vcs.version.VcsVersion
+
 import mill._
 import mill.api.Loose
 import mill.contrib.scoverage.ScoverageModule
-import mill.define.{Module, Target, Task}
+import mill.define.{Command, Module, TaskModule, Target, Task}
 import mill.main.Tasks
 import mill.scalalib._
 import mill.scalalib.publish._
@@ -171,6 +171,8 @@ object itest extends Cross[ItestCross](millItestVersions.map(_._1): _*) with Tas
 }
 class ItestCross(millItestVersion: String) extends MillIntegrationTestModule {
   val millPlatform = millItestVersions.toMap.apply(millItestVersion).millPlatform
+  def deps: Deps = millApiVersions.toMap.apply(millPlatform)
+
   override def millSourcePath: os.Path = super.millSourcePath / os.up
   override def millTestVersion = millItestVersion
   override def pluginsUnderTest = Seq(main(millPlatform))
@@ -203,6 +205,19 @@ class ItestCross(millItestVersion: String) extends MillIntegrationTestModule {
       }
       jar zip (p.sourceJar zip (p.docJar zip (p.pom zip (p.ivy zip p.artifactMetadata))))
     }
+
+  override def perTestResources = T.sources {
+    Seq(generatedSharedSrc())
+  }
+
+  def generatedSharedSrc = T {
+    os.write(
+      T.dest / "shared.sc",
+      s"""import $$ivy.`org.scoverage::scalac-scoverage-runtime:${deps.scoverageVersion}`
+         |""".stripMargin
+    )
+    PathRef(T.dest)
+  }
 }
 
 object P extends Module {
