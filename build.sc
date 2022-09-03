@@ -28,7 +28,7 @@ trait Deps {
   val millScalalib = ivy"com.lihaoyi::mill-scalalib:${millVersion}"
   val osLib = ivy"com.lihaoyi::os-lib:0.6.3"
   val scalaTest = ivy"org.scalatest::scalatest:3.2.10"
-  val scoverageVersion = "1.4.11"
+  val scoverageVersion = "2.0.2"
   val slf4j = ivy"org.slf4j:slf4j-api:1.7.25"
   val utilsFunctional = ivy"de.tototec:de.tototec.utils.functional:2.0.1"
 }
@@ -45,7 +45,8 @@ object Deps_0_9 extends Deps {
   override def millPlatform = "0.9"
   override def scalaVersion = "2.13.4"
   // keep in sync with .github/workflows/build.yml
-  override def testWithMill = Seq("0.9.12", "0.9.11", "0.9.10", "0.9.9", "0.9.8", "0.9.7", "0.9.6", "0.9.5", "0.9.4", millVersion)
+  override def testWithMill =
+    Seq("0.9.12", "0.9.11", "0.9.10", "0.9.9", "0.9.8", "0.9.7", "0.9.6", "0.9.5", "0.9.4", millVersion)
 }
 object Deps_0_7 extends Deps {
   override def millVersion = "0.7.0"
