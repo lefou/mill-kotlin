@@ -31,7 +31,7 @@ object main extends KotlinModule {
 }
 
 def verify(): Command[Unit] = T.command {
-  val A = new Assertions{}
+  val A = new Assertions {}
   import A._
 
   val cr = main.compile()

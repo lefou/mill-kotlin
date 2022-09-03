@@ -11,13 +11,11 @@ class KotlinWorkerImpl extends KotlinWorker {
 
     val compiler = new K2JVMCompiler()
     val exitCode = compiler.exec(ctx.log.errorStream, args: _*)
-    if(exitCode.getCode() != 0) {
+    if (exitCode.getCode() != 0) {
       Result.Failure(s"Kotlin compiler failed with exit code ${exitCode.getCode()} (${exitCode})")
     } else {
       Result.Success()
     }
   }
-
-
 
 }
