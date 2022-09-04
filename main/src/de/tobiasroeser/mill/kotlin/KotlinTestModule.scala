@@ -7,5 +7,4 @@ import mill.scalalib.TestModule
  *
  * @see [[KotlinModule]] for details.
  */
-trait KotlinTestModule extends TestModule with KotlinModule {
-}
+trait KotlinTestModule extends TestModule with KotlinModule {}
