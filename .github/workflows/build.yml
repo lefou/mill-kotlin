@@ -10,25 +10,13 @@ jobs:
         targets:
           - __.publishLocal $(pwd)/testRepo
           - "main[_].__.test"
+          - "itest[0.10.7].test"
           - "itest[0.10.3].test"
-          - "itest[0.10.2].test"
-          - "itest[0.10.1].test"
           - "itest[0.10.0].test"
           - "itest[0.9.12].test"
-          - "itest[0.9.11].test"
-          - "itest[0.9.10].test"
-          - "itest[0.9.9].test"
-          - "itest[0.9.8].test"
-          - "itest[0.9.7].test"
-          - "itest[0.9.6].test"
-          - "itest[0.9.5].test"
-          - "itest[0.9.4].test"
           - "itest[0.9.3].test"
           - "itest[0.8.0].test"
           - "itest[0.7.4].test"
-          - "itest[0.7.3].test"
-          - "itest[0.7.2].test"
-          - "itest[0.7.1].test"
           - "itest[0.7.0].test"
     runs-on: ${{ matrix.os }}
     continue-on-error: ${{ matrix.os == 'windows-latest' }}
