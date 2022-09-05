@@ -215,6 +215,7 @@ class ItestCross(millItestVersion: String) extends MillIntegrationTestModule {
     os.write(
       T.dest / "shared.sc",
       s"""import $$ivy.`org.scoverage::scalac-scoverage-runtime:${deps.scoverageVersion}`
+         |import $$ivy.`org.scalatest::scalatest:${deps.scalaTest.dep.version}`
          |""".stripMargin
     )
     PathRef(T.dest)
