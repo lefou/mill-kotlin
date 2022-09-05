@@ -37,7 +37,7 @@ object Deps_0_10 extends Deps {
   override def millPlatform = "0.10"
   override def scalaVersion = "2.13.8"
   // keep in sync with .github/workflows/build.yml
-  override def testWithMill = Seq("0.10.3", "0.10.2", "0.10.1", millVersion)
+  override def testWithMill = Seq("0.10.7", "0.10.3", millVersion)
   override val osLib = ivy"com.lihaoyi::os-lib:0.8.0"
 }
 object Deps_0_9 extends Deps {
@@ -45,15 +45,14 @@ object Deps_0_9 extends Deps {
   override def millPlatform = "0.9"
   override def scalaVersion = "2.13.4"
   // keep in sync with .github/workflows/build.yml
-  override def testWithMill =
-    Seq("0.9.12", "0.9.11", "0.9.10", "0.9.9", "0.9.8", "0.9.7", "0.9.6", "0.9.5", "0.9.4", millVersion)
+  override def testWithMill = Seq("0.9.12", millVersion)
 }
 object Deps_0_7 extends Deps {
   override def millVersion = "0.7.0"
   override def millPlatform = "0.7"
   override def scalaVersion = "2.13.2"
   // keep in sync with .github/workflows/build.yml
-  override def testWithMill = Seq("0.8.0", "0.7.4", "0.7.3", "0.7.2", "0.7.1", millVersion)
+  override def testWithMill = Seq("0.8.0", "0.7.4", "0.7.1", millVersion)
 }
 
 val millApiVersions = Seq(Deps_0_10, Deps_0_9, Deps_0_7).map(x => x.millPlatform -> x)
