@@ -35,7 +35,7 @@ trait Deps {
 object Deps_0_10 extends Deps {
   override def millVersion = "0.10.0"
   override def millPlatform = "0.10"
-  override def scalaVersion = "2.13.8"
+  override def scalaVersion = "2.13.10"
   // keep in sync with .github/workflows/build.yml
   override def testWithMill = Seq("0.10.7", "0.10.3", millVersion)
   override val osLib = ivy"com.lihaoyi::os-lib:0.8.0"
@@ -43,14 +43,14 @@ object Deps_0_10 extends Deps {
 object Deps_0_9 extends Deps {
   override def millVersion = "0.9.3"
   override def millPlatform = "0.9"
-  override def scalaVersion = "2.13.4"
+  override def scalaVersion = "2.13.10"
   // keep in sync with .github/workflows/build.yml
   override def testWithMill = Seq("0.9.12", millVersion)
 }
 object Deps_0_7 extends Deps {
   override def millVersion = "0.7.0"
   override def millPlatform = "0.7"
-  override def scalaVersion = "2.13.2"
+  override def scalaVersion = "2.13.10"
   // keep in sync with .github/workflows/build.yml
   override def testWithMill = Seq("0.8.0", "0.7.4", "0.7.1", millVersion)
 }
