@@ -32,12 +32,20 @@ trait Deps {
   val slf4j = ivy"org.slf4j:slf4j-api:1.7.25"
   val utilsFunctional = ivy"de.tototec:de.tototec.utils.functional:2.0.1"
 }
+object Deps_0_11 extends Deps {
+  override def millVersion = "0.11.0-M1"
+  override def millPlatform = "0.11.0-M1"
+  override def scalaVersion = "2.13.10"
+  // keep in sync with .github/workflows/build.yml
+  override def testWithMill = Seq(millVersion)
+  override val osLib = ivy"com.lihaoyi::os-lib:0.9.0"
+}
 object Deps_0_10 extends Deps {
   override def millVersion = "0.10.0"
   override def millPlatform = "0.10"
   override def scalaVersion = "2.13.10"
   // keep in sync with .github/workflows/build.yml
-  override def testWithMill = Seq("0.10.7", "0.10.3", millVersion)
+  override def testWithMill = Seq("0.10.10", "0.10.3", millVersion)
   override val osLib = ivy"com.lihaoyi::os-lib:0.8.0"
 }
 object Deps_0_9 extends Deps {
@@ -55,7 +63,7 @@ object Deps_0_7 extends Deps {
   override def testWithMill = Seq("0.8.0", "0.7.4", "0.7.1", millVersion)
 }
 
-val millApiVersions = Seq(Deps_0_10, Deps_0_9, Deps_0_7).map(x => x.millPlatform -> x)
+val millApiVersions = Seq(Deps_0_11, Deps_0_10, Deps_0_9, Deps_0_7).map(x => x.millPlatform -> x)
 
 val millItestVersions = millApiVersions.flatMap { case (_, d) => d.testWithMill.map(_ -> d) }
 
