@@ -27,7 +27,7 @@ trait Deps {
   val millMain = ivy"com.lihaoyi::mill-main:${millVersion}"
   val millScalalib = ivy"com.lihaoyi::mill-scalalib:${millVersion}"
   val osLib = ivy"com.lihaoyi::os-lib:0.6.3"
-  val scalaTest = ivy"org.scalatest::scalatest:3.2.14"
+  val scalaTest = ivy"org.scalatest::scalatest:3.2.15"
   val scoverageVersion = "2.0.7"
   val slf4j = ivy"org.slf4j:slf4j-api:1.7.25"
   val utilsFunctional = ivy"de.tototec:de.tototec.utils.functional:2.0.1"
