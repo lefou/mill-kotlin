@@ -48,7 +48,7 @@ object Deps_0_9 extends Deps {
   override def testWithMill = Seq("0.9.12", millVersion)
 }
 object Deps_0_7 extends Deps {
-  override def millVersion = "0.7.0"
+  override def millVersion = "0.7.4"
   override def millPlatform = "0.7"
   override def scalaVersion = "2.13.10"
   // keep in sync with .github/workflows/build.yml
