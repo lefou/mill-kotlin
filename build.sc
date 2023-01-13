@@ -33,7 +33,7 @@ trait Deps {
   val utilsFunctional = ivy"de.tototec:de.tototec.utils.functional:2.0.1"
 }
 object Deps_0_10 extends Deps {
-  override def millVersion = "0.10.0"
+  override def millVersion = "0.10.10"
   override def millPlatform = "0.10"
   override def scalaVersion = "2.13.10"
   // keep in sync with .github/workflows/build.yml
