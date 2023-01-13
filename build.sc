@@ -16,7 +16,7 @@ import mill.scalalib._
 import mill.scalalib.publish._
 
 trait Deps {
-  def kotlinVersion = "1.0.0"
+  def kotlinVersion = "1.0.7"
   def millPlatform: String
   def millVersion: String
   def scalaVersion: String
