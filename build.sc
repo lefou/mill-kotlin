@@ -10,7 +10,7 @@ import de.tobiasroeser.mill.vcs.version.VcsVersion
 import mill._
 import mill.api.Loose
 import mill.contrib.scoverage.ScoverageModule
-import mill.define.{Command, Module, TaskModule, Target, Task}
+import mill.define.{Command, Module, Sources, TaskModule, Target, Task}
 import mill.main.Tasks
 import mill.scalalib._
 import mill.scalalib.publish._
@@ -26,36 +26,46 @@ trait Deps {
   val millMainApi = ivy"com.lihaoyi::mill-main-api:${millVersion}"
   val millMain = ivy"com.lihaoyi::mill-main:${millVersion}"
   val millScalalib = ivy"com.lihaoyi::mill-scalalib:${millVersion}"
-  val osLib = ivy"com.lihaoyi::os-lib:0.6.3"
+  def osLib: Dep
   val scalaTest = ivy"org.scalatest::scalatest:3.2.15"
   val scoverageVersion = "2.0.7"
   val slf4j = ivy"org.slf4j:slf4j-api:1.7.25"
   val utilsFunctional = ivy"de.tototec:de.tototec.utils.functional:2.0.1"
 }
+object Deps_0_11 extends Deps {
+  override def millVersion = millPlatform // only valid for exact milestone versions
+  override def millPlatform = "0.11.0-M2" // needs to be an exact milestone version
+  override def scalaVersion = "2.13.10"
+  // keep in sync with .github/workflows/build.yml
+  override def testWithMill = Seq(millVersion)
+  override val osLib = ivy"com.lihaoyi::os-lib:0.9.0"
+}
 object Deps_0_10 extends Deps {
-  override def millVersion = "0.10.0"
+  override def millVersion = "0.10.0" // scala-steward:off
   override def millPlatform = "0.10"
   override def scalaVersion = "2.13.10"
   // keep in sync with .github/workflows/build.yml
-  override def testWithMill = Seq("0.10.7", "0.10.3", millVersion)
+  override def testWithMill = Seq("0.10.10", "0.10.3", millVersion)
   override val osLib = ivy"com.lihaoyi::os-lib:0.8.0"
 }
 object Deps_0_9 extends Deps {
-  override def millVersion = "0.9.3"
+  override def millVersion = "0.9.3" // scala-steward:off
   override def millPlatform = "0.9"
   override def scalaVersion = "2.13.10"
   // keep in sync with .github/workflows/build.yml
   override def testWithMill = Seq("0.9.12", millVersion)
+  override val osLib = ivy"com.lihaoyi::os-lib:0.6.3"
 }
 object Deps_0_7 extends Deps {
-  override def millVersion = "0.7.0"
+  override def millVersion = "0.7.0" // scala-steward:off
   override def millPlatform = "0.7"
   override def scalaVersion = "2.13.10"
   // keep in sync with .github/workflows/build.yml
   override def testWithMill = Seq("0.8.0", "0.7.4", "0.7.1", millVersion)
+  override val osLib = ivy"com.lihaoyi::os-lib:0.6.3"
 }
 
-val millApiVersions = Seq(Deps_0_10, Deps_0_9, Deps_0_7).map(x => x.millPlatform -> x)
+val millApiVersions = Seq(Deps_0_11, Deps_0_10, Deps_0_9, Deps_0_7).map(x => x.millPlatform -> x)
 
 val millItestVersions = millApiVersions.flatMap { case (_, d) => d.testWithMill.map(_ -> d) }
 
@@ -71,10 +81,6 @@ trait MillKotlinModule extends CrossScalaModule with PublishModule with Scoverag
   override def javacOptions = Seq("-source", "1.8", "-target", "1.8", "-encoding", "UTF-8")
   override def scalacOptions = Seq("-target:jvm-1.8", "-encoding", "UTF-8")
   override def scoverageVersion = deps.scoverageVersion
-  // we need to adapt to changed publishing policy - patch-level
-  override def scoveragePluginDep = T {
-    ivy"org.scoverage:::scalac-scoverage-plugin:${scoverageVersion()}"
-  }
 
   def pomSettings = T {
     PomSettings(
@@ -87,7 +93,7 @@ trait MillKotlinModule extends CrossScalaModule with PublishModule with Scoverag
     )
   }
 
-  override def skipIdea: Boolean = millApiVersions.head._2.scalaVersion != crossScalaVersion
+  override def skipIdea: Boolean = millApiVersions.head._2.millPlatform != millPlatform
 }
 
 object api extends Cross[ApiCross](millApiVersions.map(_._1): _*)
@@ -121,6 +127,17 @@ class MainCross(override val millPlatform: String) extends MillKotlinModule {
   override def ivyDeps = T {
     Agg(ivy"${scalaOrganization()}:scala-library:${scalaVersion()}")
   }
+  override def sources: Sources = T.sources {
+      Seq(
+        PathRef(millSourcePath / s"src"),
+        if (Seq(Deps_0_7, Deps_0_9, Deps_0_10).forall(d => d.millPlatform != millPlatform))
+          PathRef(millSourcePath / s"src-${millPlatform.split("[.]").take(2).mkString(".")}")
+        else
+          PathRef(millSourcePath / s"src-0.10-")
+      )
+  }
+
+
   override def compileIvyDeps = Agg(
     deps.millMain,
     deps.millScalalib

@@ -18,7 +18,9 @@ object main extends KotlinModule {
   def mainClass = Some("hello.JavaHello")
 
   object test extends Tests {
-    def testFrameworks = Seq("com.novocode.junit.JUnitFramework")
+//     compatibility with older Mill versions
+    def testFrameworks: T[Seq[String]] = T(Seq(testFramework()))
+    def testFramework: T[String] = "com.novocode.junit.JUnitFramework"
     def ivyDeps = Agg(
       ivy"com.novocode:junit-interface:0.11",
       ivy"junit:junit:4.12",
