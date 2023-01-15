@@ -10,7 +10,7 @@ import mill.modules.{Jvm, Util}
 import mill.scalalib.{Dep, DepSyntax, JavaModule, TestModule}
 import mill.scalalib.api.CompilationResult
 
-trait KotlinModule extends JavaModule { outer =>
+trait KotlinModule extends JavaModule with KotlinModulePlatform { outer =>
 
   /**
    * All individual source files fed into the compiler.
@@ -67,7 +67,7 @@ trait KotlinModule extends JavaModule { outer =>
    * The Ivy/Coursier dependencies resembling the Kotlin compiler.
    * Default is derived from [[kotlinCompilerVersion]].
    */
-  def kotlinCompilerIvyDeps: T[Agg[Dep]] = T {
+  override def kotlinCompilerIvyDeps: T[Agg[Dep]] = T {
     Agg(ivy"${Versions.millKotlinWorkerImplIvyDep}") ++
       Agg(ivy"org.jetbrains.kotlin:kotlin-compiler:${kotlinCompilerVersion()}") ++
 //      (
@@ -86,14 +86,6 @@ trait KotlinModule extends JavaModule { outer =>
       )
 //    ivy"org.jetbrains.kotlin:kotlin-scripting-compiler-impl:${kotlinCompilerVersion()}",
 //    ivy"org.jetbrains.kotlin:kotlin-scripting-common:${kotlinCompilerVersion()}",
-  }
-
-  /**
-   * The Java classpath resembling the Kotlin compiler.
-   * Default is derived from [[kotlinCompilerIvyDeps]].
-   */
-  def kotlinCompilerClasspath: T[Seq[PathRef]] = T {
-    resolveDeps(kotlinCompilerIvyDeps)().toSeq
   }
 
   def kotlinWorker: Worker[KotlinWorker] = T.worker {
@@ -226,7 +218,7 @@ trait KotlinModule extends JavaModule { outer =>
   /**
    * A test sub-module linked to its parent module best suited for unit-tests.
    */
-  trait KotlinModuleTests extends super.Tests with KotlinTestModule {
+  trait KotlinModuleTests extends super[JavaModule].Tests with KotlinTestModule {
     override def kotlinVersion: T[String] = T { outer.kotlinVersion() }
     override def kotlinCompilerVersion: T[String] = T { outer.kotlinCompilerVersion() }
     override def kotlincOptions: T[Seq[String]] = T { outer.kotlincOptions() }
