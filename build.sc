@@ -13,6 +13,7 @@ import mill.contrib.scoverage.ScoverageModule
 import mill.define.{Command, Module, Sources, TaskModule, Target, Task}
 import mill.main.Tasks
 import mill.scalalib._
+import mill.scalalib.api.ZincWorkerUtil
 import mill.scalalib.publish._
 
 trait Deps {
@@ -128,13 +129,12 @@ class MainCross(override val millPlatform: String) extends MillKotlinModule {
     Agg(ivy"${scalaOrganization()}:scala-library:${scalaVersion()}")
   }
   override def sources: Sources = T.sources {
-      Seq(
-        PathRef(millSourcePath / s"src"),
-        if (Seq(Deps_0_7, Deps_0_9, Deps_0_10).forall(d => d.millPlatform != millPlatform))
-          PathRef(millSourcePath / s"src-${millPlatform.split("[.]").take(2).mkString(".")}")
-        else
-          PathRef(millSourcePath / s"src-0.10-")
-      )
+    val suffixes =
+      ZincWorkerUtil.matchingVersions(millPlatform) ++
+      ZincWorkerUtil.versionRanges(millPlatform, millApiVersions.map(_._1))
+
+    PathRef(millSourcePath / s"src") +:
+      suffixes.map(v => PathRef(millSourcePath / ("src-" + v)))
   }
 
 

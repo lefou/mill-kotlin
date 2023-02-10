@@ -3,7 +3,7 @@ package de.tobiasroeser.mill.kotlin
 import java.io.File
 import java.net.{URL, URLClassLoader}
 import mill.{Agg, T}
-import mill.api.{CompileProblemReporter, Ctx, PathRef, Result}
+import mill.api.{Ctx, PathRef, Result}
 import mill.define.{Command, Task, Worker}
 import mill.modules.{Jvm, Util}
 import mill.scalalib.{Dep, DepSyntax, JavaModule, TestModule}

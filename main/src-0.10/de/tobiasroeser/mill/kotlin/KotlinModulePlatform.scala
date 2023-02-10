@@ -1,10 +1,14 @@
 package de.tobiasroeser.mill.kotlin
 
 import mill.{Agg, T}
-import mill.api.PathRef
+import mill.api.{PathRef, Result}
+import mill.define.Task
 import mill.scalalib.{Dep, JavaModule}
+import mill.scalalib.api.{CompilationResult, ZincWorkerApi}
 
 trait KotlinModulePlatform extends JavaModule {
+
+  type CompileProblemReporter = mill.api.CompileProblemReporter
 
   def kotlinCompilerIvyDeps: T[Agg[Dep]]
 
