@@ -1,10 +1,10 @@
 package de.tobiasroeser.mill.kotlin
 
 import mill.{Agg, T}
-import mill.api.{CompileProblemReporter, PathRef, Result}
+import mill.api.{PathRef, Result}
 import mill.define.Task
-import mill.scalalib.api.{CompilationResult, ZincWorkerApi}
 import mill.scalalib.{Dep, JavaModule}
+import mill.scalalib.api.{CompilationResult, ZincWorkerApi}
 
 trait KotlinModulePlatform extends JavaModule {
 
@@ -17,7 +17,7 @@ trait KotlinModulePlatform extends JavaModule {
    * Default is derived from [[kotlinCompilerIvyDeps]].
    */
   def kotlinCompilerClasspath: T[Seq[PathRef]] = T {
-    resolveDeps(T.task { kotlinCompilerIvyDeps().map(bindDependency()) })().toSeq
+    resolveDeps(kotlinCompilerIvyDeps)().toSeq
   }
 
   private[kotlin] def internalCompileJavaFiles(
@@ -34,11 +34,10 @@ trait KotlinModulePlatform extends JavaModule {
       sources = javaSourceFiles,
       compileClasspath = compileCp,
       javacOptions = javacOptions,
-      reporter = compileProblemReporter,
-      reportCachedProblems = reportOldProblems
+      reporter = compileProblemReporter
     )
   }
 
-  private[kotlin] def internalReportOldProblems: Task[Boolean] = zincReportCachedProblems
+  private[kotlin] def internalReportOldProblems: Task[Boolean] = T.task(false)
 
 }
