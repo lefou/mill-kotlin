@@ -2,9 +2,8 @@ package de.tobiasroeser.mill.kotlin
 
 import java.io.File
 import java.net.{URL, URLClassLoader}
-
 import mill.{Agg, T}
-import mill.api.{Ctx, PathRef, Result}
+import mill.api.{CompileProblemReporter, Ctx, PathRef, Result}
 import mill.define.{Command, Task, Worker}
 import mill.modules.{Jvm, Util}
 import mill.scalalib.{Dep, DepSyntax, JavaModule, TestModule}
@@ -153,12 +152,14 @@ trait KotlinModule extends JavaModule with KotlinModulePlatform { outer =>
 
     def compileJava: Result[CompilationResult] = {
       // The compile step is lazy, but it's dependencies are not!
-      zincWorker.worker().compileJava(
-        updateCompileOutput,
-        javaSourceFiles,
-        compileCp,
-        javacOptions(),
-        ctx.reporter(hashCode)
+      internalCompileJavaFiles(
+        worker = zincWorker.worker(),
+        upstreamCompileOutput = updateCompileOutput,
+        javaSourceFiles = javaSourceFiles,
+        compileCp = compileCp,
+        javacOptions = javacOptions(),
+        compileProblemReporter = ctx.reporter(hashCode),
+        reportOldProblems = internalReportOldProblems()
       )
     }
 

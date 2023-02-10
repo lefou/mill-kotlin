@@ -16,4 +16,24 @@ trait KotlinModulePlatform extends JavaModule {
     resolveDeps(kotlinCompilerIvyDeps)().toSeq
   }
 
+  private[kotlin] def internalCompileJavaFiles(
+    worker: ZincWorkerApi,
+    upstreamCompileOutput: Seq[CompilationResult],
+    javaSourceFiles: Seq[os.Path],
+    compileCp: Agg[os.Path],
+    javacOptions: Seq[String],
+    compileProblemReporter: Option[CompileProblemReporter],
+    reportOldProblems: Boolean
+  )(implicit ctx: ZincWorkerApi.Ctx): Result[CompilationResult] = {
+    worker.compileJava(
+      upstreamCompileOutput = upstreamCompileOutput,
+      sources = javaSourceFiles,
+      compileClasspath = compileCp,
+      javacOptions = javacOptions,
+      reporter = compileProblemReporter
+    )
+  }
+
+  private[kotlin] def internalReportOldProblems: Task[Boolean] = T.task(false)
+
 }
