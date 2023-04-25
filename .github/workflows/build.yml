@@ -10,7 +10,7 @@ jobs:
         targets:
           - __.publishLocal $(pwd)/testRepo
           - "main[_].__.test"
-          - "itest[0.11.0-M7].test"
+          - "itest[0.11.0-M8].test"
           - "itest[0.10.11].test"
           - "itest[0.10.3].test"
           - "itest[0.10.0].test"
