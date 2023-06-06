@@ -3,7 +3,6 @@ import $file.shared
 
 import mill._
 import mill.scalalib._
-import mill.define._
 import de.tobiasroeser.mill.kotlin._
 import org.scalatest.Assertions
 
@@ -14,7 +13,7 @@ object main extends KotlinModule {
 
   def mainClass = Some("hello.HelloKt")
 
-  object test extends Tests {
+  object test extends KotlinModuleTests {
     // compatibility with older Mill versions
     def testFrameworks: T[Seq[String]] = T(Seq(testFramework()))
     def testFramework: T[String] = "com.novocode.junit.JUnitFramework"
@@ -27,7 +26,7 @@ object main extends KotlinModule {
 
 }
 
-def verify(): Command[Unit] = T.command {
+def verify() = T.command {
   val A = new Assertions {}
   import A._
 
