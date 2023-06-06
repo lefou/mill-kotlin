@@ -20,7 +20,7 @@ trait Deps {
   def kotlinVersion = "1.0.0"
   def millPlatform: String
   def millVersion: String
-  def scalaVersion: String
+  def scalaVersion: String = "2.13.11"
   def testWithMill: Seq[String]
 
   val kotlinCompiler = ivy"org.jetbrains.kotlin:kotlin-compiler:${kotlinVersion}"
@@ -35,8 +35,7 @@ trait Deps {
 }
 object Deps_0_11 extends Deps {
   override def millVersion = millPlatform // only valid for exact milestone versions
-  override def millPlatform = "0.11.0-M8" // needs to be an exact milestone version
-  override def scalaVersion = "2.13.10"
+  override def millPlatform = "0.11.0-M11" // needs to be an exact milestone version
   // keep in sync with .github/workflows/build.yml
   override def testWithMill = Seq(millVersion)
   override val osLib = ivy"com.lihaoyi::os-lib:0.9.1"
@@ -44,7 +43,6 @@ object Deps_0_11 extends Deps {
 object Deps_0_10 extends Deps {
   override def millVersion = "0.10.0" // scala-steward:off
   override def millPlatform = "0.10"
-  override def scalaVersion = "2.13.10"
   // keep in sync with .github/workflows/build.yml
   override def testWithMill = Seq("0.10.11", "0.10.3", millVersion)
   override val osLib = ivy"com.lihaoyi::os-lib:0.8.0"
@@ -52,7 +50,6 @@ object Deps_0_10 extends Deps {
 object Deps_0_9 extends Deps {
   override def millVersion = "0.9.3" // scala-steward:off
   override def millPlatform = "0.9"
-  override def scalaVersion = "2.13.10"
   // keep in sync with .github/workflows/build.yml
   override def testWithMill = Seq("0.9.12", millVersion)
   override val osLib = ivy"com.lihaoyi::os-lib:0.6.3"
@@ -60,7 +57,6 @@ object Deps_0_9 extends Deps {
 object Deps_0_7 extends Deps {
   override def millVersion = "0.7.0" // scala-steward:off
   override def millPlatform = "0.7"
-  override def scalaVersion = "2.13.10"
   // keep in sync with .github/workflows/build.yml
   override def testWithMill = Seq("0.8.0", "0.7.4", "0.7.1", millVersion)
   override val osLib = ivy"com.lihaoyi::os-lib:0.6.3"

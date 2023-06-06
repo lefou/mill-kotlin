@@ -153,7 +153,7 @@ trait KotlinModule extends JavaModule with KotlinModulePlatform { outer =>
     def compileJava: Result[CompilationResult] = {
       // The compile step is lazy, but it's dependencies are not!
       internalCompileJavaFiles(
-        worker = zincWorker.worker(),
+        worker = zincWorkerRef().worker(),
         upstreamCompileOutput = updateCompileOutput,
         javaSourceFiles = javaSourceFiles,
         compileCp = compileCp,
@@ -219,11 +219,12 @@ trait KotlinModule extends JavaModule with KotlinModulePlatform { outer =>
   /**
    * A test sub-module linked to its parent module best suited for unit-tests.
    */
-  trait KotlinModuleTests extends super[JavaModule].Tests with KotlinTestModule {
+  trait KotlinModuleTests extends JavaModuleTests with KotlinTestModule {
     override def kotlinVersion: T[String] = T { outer.kotlinVersion() }
     override def kotlinCompilerVersion: T[String] = T { outer.kotlinCompilerVersion() }
     override def kotlincOptions: T[Seq[String]] = T { outer.kotlincOptions() }
   }
+  @deprecated("Use KotlinModuleTests instead.", "mill-kotlin after 0.2.2")
   trait Tests extends KotlinModuleTests
 
 }

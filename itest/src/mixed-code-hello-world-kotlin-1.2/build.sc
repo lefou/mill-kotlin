@@ -3,7 +3,6 @@ import $file.shared
 
 import mill._
 import mill.scalalib._
-import mill.define._
 import de.tobiasroeser.mill.kotlin._
 import org.scalatest.Assertions
 

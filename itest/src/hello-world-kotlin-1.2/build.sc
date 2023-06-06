@@ -3,7 +3,6 @@ import $file.shared
 
 import mill._
 import mill.scalalib._
-import mill.define._
 import de.tobiasroeser.mill.kotlin._
 import org.scalatest.Assertions
 
@@ -14,7 +13,7 @@ object main extends KotlinModule {
 
   def mainClass = Some("hello.HelloKt")
 
-  object test extends Tests {
+  object test extends KotlinModuleTests {
     def testFrameworks = Seq("com.novocode.junit.JUnitFramework")
     def ivyDeps = Agg(
       ivy"com.novocode:junit-interface:0.11",
@@ -25,7 +24,7 @@ object main extends KotlinModule {
 
 }
 
-def verify(): Command[Unit] = T.command {
+def verify() = T.command {
   val A = new Assertions {}
   import A._
 

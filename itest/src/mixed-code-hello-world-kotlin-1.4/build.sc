@@ -3,7 +3,6 @@ import $file.shared
 
 import mill._
 import mill.scalalib._
-import mill.define._
 import de.tobiasroeser.mill.kotlin._
 import org.scalatest.Assertions
 
@@ -30,7 +29,7 @@ object main extends KotlinModule {
 
 }
 
-def verify(): Command[Unit] = T.command {
+def verify() = T.command {
   val A = new Assertions {}
   import A._
 
