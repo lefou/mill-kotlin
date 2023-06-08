@@ -35,7 +35,7 @@ trait Deps {
 }
 object Deps_0_11 extends Deps {
   override def millVersion = millPlatform // only valid for exact milestone versions
-  override def millPlatform = "0.11.0-M11" // needs to be an exact milestone version
+  override def millPlatform = "0.11.0" // needs to be an exact milestone version
   // keep in sync with .github/workflows/build.yml
   override def testWithMill = Seq(millVersion)
   override val osLib = ivy"com.lihaoyi::os-lib:0.9.1"
