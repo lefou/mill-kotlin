@@ -1,7 +1,7 @@
 = mill-kotlin - Kotlin compiler support for mill
-:version: 0.2.2
-:mill-platform: 0.10
-:kotlinVersion: 1.4.21
+:version: 0.2.3
+:mill-platform: 0.11
+:kotlinVersion: 1.8.22
 :projectHome: https://github.com/lefou/mill-kotlin
 :min-mill-version: 0.7.0
 :toc:
@@ -153,11 +153,13 @@ Contributing::
 
 == Changelog
 
-=== main branch
-:version: main
+=== 0.2.3 - 2023-06-12
+:version: 0.2.3
 :prev-version: 0.2.2
 :github-milestone: 6
 
+* Added support for Mill 0.11.x
+* Various internal improvements and version updates
 
 _See
 ifeval::["{github-milestone}" != ""]
@@ -167,7 +169,7 @@ endif::[]
 https://github.com/lefou/mill-kotlin/compare/{prev-version}\...{version}[list of commits]_
 
 
-=== mill-kotlin 0.2.2 - 2022-01-16
+=== 0.2.2 - 2022-01-16
 :version: main
 :prev-version: 0.2.1
 :github-milestone: 5
@@ -182,7 +184,7 @@ endif::[]
 https://github.com/lefou/mill-kotlin/compare/{prev-version}\...{version}[list of commits]_
 
 
-=== mill-kotlin 0.2.1 - 2022-01-16
+=== 0.2.1 - 2022-01-16
 :version: 0.2.1
 :prev-version: 0.2.0
 :github-milestone: 4
@@ -198,7 +200,7 @@ endif::[]
 https://github.com/lefou/mill-kotlin/compare/{prev-version}\...{version}[list of commits]_
 
 
-=== mill-kotlin 0.2.0 - 2021-01-17
+=== 0.2.0 - 2021-01-17
 :version: 0.2.0
 :prev-version: 0.1.1
 :github-milestone:
@@ -219,7 +221,7 @@ and the
 endif::[]
 https://github.com/lefou/mill-kotlin/compare/{prev-version}\...{version}[list of commits]_
 
-=== mill-kotlin 0.1.1 - 2020-12-01
+=== 0.1.1 - 2020-12-01
 :version: 0.1.1
 :prev-version: 0.1.0
 :github-milestone: 3
@@ -234,7 +236,7 @@ and the
 endif::[]
 https://github.com/lefou/mill-kotlin/compare/{prev-version}\...{version}[list of commits]_
 
-=== mill-kotlin 0.1.0 - 2020-06-30
+=== 0.1.0 - 2020-06-30
 :version: 0.1.0
 :prev-version: 0.0.3
 :github-milestone: 2
@@ -249,7 +251,7 @@ endif::[]
 https://github.com/lefou/mill-kotlin/compare/{prev-version}\...{version}[list of commits]_
 
 
-=== mill-kotlin 0.0.3 - 2020-02-25
+=== 0.0.3 - 2020-02-25
 :version: 0.0.3
 :prev-version: 0.0.2
 :github-milestone:
@@ -264,7 +266,7 @@ endif::[]
 https://github.com/lefou/mill-kotlin/compare/{prev-version}\...{version}[list of commits]_
 
 
-=== mill-kotlin 0.0.2 - 2020-02-25
+=== 0.0.2 - 2020-02-25
 :version: 0.0.2
 :prev-version: 0.0.1
 :github-milestone: 1
@@ -278,7 +280,7 @@ and the
 endif::[]
 https://github.com/lefou/mill-kotlin/compare/{prev-version}\...{version}[list of commits]_
 
-=== mill-kotlin 0.0.1 - 2020-02-20
+=== 0.0.1 - 2020-02-20
 :version: 0.0.1
 :prev-version: 6756a7323d020eabedf9a9cd70f54c61fe30472a
 :github-milestone:
