@@ -10,8 +10,7 @@ import de.tobiasroeser.mill.vcs.version.VcsVersion
 import mill._
 import mill.api.Loose
 import mill.contrib.scoverage.ScoverageModule
-import mill.define.{Command, Module, Sources, TaskModule, Target, Task}
-import mill.main.Tasks
+import mill.define.{Command, Module, TaskModule, Target, Task}
 import mill.scalalib._
 import mill.scalalib.api.ZincWorkerUtil
 import mill.scalalib.publish._
@@ -66,12 +65,12 @@ val millApiVersions = Seq(Deps_0_11, Deps_0_10, Deps_0_9, Deps_0_7).map(x => x.m
 
 val millItestVersions = millApiVersions.flatMap { case (_, d) => d.testWithMill.map(_ -> d) }
 
-val baseDir = build.millSourcePath
+lazy val baseDir: os.Path = build.millSourcePath
 
-trait MillKotlinModule extends CrossScalaModule with PublishModule with ScoverageModule {
-  def millPlatform: String
+trait MillKotlinModule extends PublishModule with ScoverageModule with Cross.Module[String] {
+  def millPlatform: String = crossValue
   def deps: Deps = millApiVersions.toMap.apply(millPlatform)
-  override def crossScalaVersion = deps.scalaVersion
+  override def scalaVersion = deps.scalaVersion
   override def publishVersion: T[String] = VcsVersion.vcsState().format()
   override def artifactSuffix: T[String] = s"_mill${millPlatform}_${artifactScalaVersion()}"
 
@@ -93,8 +92,8 @@ trait MillKotlinModule extends CrossScalaModule with PublishModule with Scoverag
   override def skipIdea: Boolean = millApiVersions.head._2.millPlatform != millPlatform
 }
 
-object api extends Cross[ApiCross](millApiVersions.map(_._1): _*)
-class ApiCross(override val millPlatform: String) extends MillKotlinModule {
+object api extends Cross[ApiCross](millApiVersions.map(_._1))
+trait ApiCross extends MillKotlinModule {
   override def artifactName = T { "de.tobiasroeser.mill.kotlin-api" }
   override def compileIvyDeps: T[Loose.Agg[Dep]] = T {
     Agg(
@@ -104,8 +103,8 @@ class ApiCross(override val millPlatform: String) extends MillKotlinModule {
   }
 }
 
-object worker extends Cross[WorkerCross](millApiVersions.map(_._1): _*)
-class WorkerCross(override val millPlatform: String) extends MillKotlinModule {
+object worker extends Cross[WorkerCross](millApiVersions.map(_._1))
+trait WorkerCross extends MillKotlinModule {
   override def artifactName = T { "de.tobiasroeser.mill.kotlin-worker" }
   override def moduleDeps: Seq[PublishModule] = Seq(api(millPlatform))
   override def compileIvyDeps: T[Loose.Agg[Dep]] = T {
@@ -117,14 +116,14 @@ class WorkerCross(override val millPlatform: String) extends MillKotlinModule {
   }
 }
 
-object main extends Cross[MainCross](millApiVersions.map(_._1): _*)
-class MainCross(override val millPlatform: String) extends MillKotlinModule {
+object main extends Cross[MainCross](millApiVersions.map(_._1))
+trait MainCross extends MillKotlinModule {
   override def artifactName = T { "de.tobiasroeser.mill.kotlin" }
   override def moduleDeps: Seq[PublishModule] = Seq(api(millPlatform))
   override def ivyDeps = T {
     Agg(ivy"${scalaOrganization()}:scala-library:${scalaVersion()}")
   }
-  override def sources: Sources = T.sources {
+  override def sources = T.sources {
     val suffixes =
       ZincWorkerUtil.matchingVersions(millPlatform) ++
       ZincWorkerUtil.versionRanges(millPlatform, millApiVersions.map(_._1))
@@ -139,7 +138,7 @@ class MainCross(override val millPlatform: String) extends MillKotlinModule {
     deps.millScalalib
   )
 
-  object test extends Tests with TestModule.ScalaTest {
+  object test extends ScalaTests with TestModule.ScalaTest {
     override def ivyDeps = Agg(
       deps.scalaTest
     )
@@ -177,16 +176,16 @@ class MainCross(override val millPlatform: String) extends MillKotlinModule {
 
 }
 
-object itest extends Cross[ItestCross](millItestVersions.map(_._1): _*) with TaskModule {
+object itest extends Cross[ItestCross](millItestVersions.map(_._1)) with TaskModule {
   override def defaultCommandName(): String = "test"
   def testCached: T[Seq[TestCase]] = itest(millItestVersions.map(_._1).head).testCached
   def test(args: String*): Command[Seq[TestCase]] = itest(millItestVersions.map(_._1).head).test()
 }
-class ItestCross(millItestVersion: String) extends MillIntegrationTestModule {
+trait ItestCross extends MillIntegrationTestModule with Cross.Module[String] {
+  def millItestVersion = crossValue
   val millPlatform = millItestVersions.toMap.apply(millItestVersion).millPlatform
   def deps: Deps = millApiVersions.toMap.apply(millPlatform)
 
-  override def millSourcePath: os.Path = super.millSourcePath / os.up
   override def millTestVersion = millItestVersion
   override def pluginsUnderTest = Seq(main(millPlatform))
   override def temporaryIvyModules = Seq(api(millPlatform), worker(millPlatform))
@@ -202,7 +201,7 @@ class ItestCross(millItestVersion: String) extends MillIntegrationTestModule {
   }
 
   override def temporaryIvyModulesDetails
-      : Task.Sequence[(PathRef, (PathRef, (PathRef, (PathRef, (PathRef, Artifact)))))] =
+      : Task[Seq[(PathRef, (PathRef, (PathRef, (PathRef, (PathRef, Artifact)))))]] =
     Target.traverse(temporaryIvyModules) { p =>
       val jar = p match {
         case p: ScoverageModule => p.scoverage.jar
@@ -210,7 +209,7 @@ class ItestCross(millItestVersion: String) extends MillIntegrationTestModule {
       }
       jar zip (p.sourceJar zip (p.docJar zip (p.pom zip (p.ivy zip p.artifactMetadata))))
     }
-  override def pluginUnderTestDetails: Task.Sequence[(PathRef, (PathRef, (PathRef, (PathRef, (PathRef, Artifact)))))] =
+  override def pluginUnderTestDetails: Task[Seq[(PathRef, (PathRef, (PathRef, (PathRef, (PathRef, Artifact)))))]] =
     Target.traverse(pluginsUnderTest) { p =>
       val jar = p match {
         case p: ScoverageModule => p.scoverage.jar
@@ -240,7 +239,7 @@ object P extends Module {
    * Update the millw script.
    */
   def millw() = T.command {
-    val target = mill.modules.Util.download("https://raw.githubusercontent.com/lefou/millw/master/millw")
+    val target = mill.util.Util.download("https://raw.githubusercontent.com/lefou/millw/master/millw")
     val millw = baseDir / "millw"
     os.copy.over(target.path, millw)
     os.perms.set(millw, os.perms(millw) + java.nio.file.attribute.PosixFilePermission.OWNER_EXECUTE)
