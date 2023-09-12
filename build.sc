@@ -19,7 +19,7 @@ trait Deps {
   def kotlinVersion = "1.0.0"
   def millPlatform: String
   def millVersion: String
-  def scalaVersion: String = "2.13.11"
+  def scalaVersion: String = "2.13.12"
   def testWithMill: Seq[String]
 
   val kotlinCompiler = ivy"org.jetbrains.kotlin:kotlin-compiler:${kotlinVersion}"
