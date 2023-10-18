@@ -14,7 +14,7 @@ class KotlinWorkerImpl extends KotlinWorker {
     if (exitCode.getCode() != 0) {
       Result.Failure(s"Kotlin compiler failed with exit code ${exitCode.getCode()} (${exitCode})")
     } else {
-      Result.Success()
+      Result.Success(())
     }
   }
 

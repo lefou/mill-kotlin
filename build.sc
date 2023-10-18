@@ -37,28 +37,28 @@ object Deps_0_11 extends Deps {
   override def millPlatform = "0.11"
   // keep in sync with .github/workflows/build.yml
   override def testWithMill = Seq(millVersion)
-  override val osLib = ivy"com.lihaoyi::os-lib:0.9.1"  // scala-steward:off
+  override val osLib = ivy"com.lihaoyi::os-lib:0.9.1" // scala-steward:off
 }
 object Deps_0_10 extends Deps {
   override def millVersion = "0.10.0" // scala-steward:off
   override def millPlatform = "0.10"
   // keep in sync with .github/workflows/build.yml
   override def testWithMill = Seq("0.10.11", "0.10.3", millVersion)
-  override val osLib = ivy"com.lihaoyi::os-lib:0.8.0"  // scala-steward:off
+  override val osLib = ivy"com.lihaoyi::os-lib:0.8.0" // scala-steward:off
 }
 object Deps_0_9 extends Deps {
   override def millVersion = "0.9.3" // scala-steward:off
   override def millPlatform = "0.9"
   // keep in sync with .github/workflows/build.yml
   override def testWithMill = Seq("0.9.12", millVersion)
-  override val osLib = ivy"com.lihaoyi::os-lib:0.6.3"  // scala-steward:off
+  override val osLib = ivy"com.lihaoyi::os-lib:0.6.3" // scala-steward:off
 }
 object Deps_0_7 extends Deps {
   override def millVersion = "0.7.0" // scala-steward:off
   override def millPlatform = "0.7"
   // keep in sync with .github/workflows/build.yml
   override def testWithMill = Seq("0.8.0", "0.7.4", "0.7.1", millVersion)
-  override val osLib = ivy"com.lihaoyi::os-lib:0.6.3"  // scala-steward:off
+  override val osLib = ivy"com.lihaoyi::os-lib:0.6.3" // scala-steward:off
 }
 
 val millApiVersions = Seq(Deps_0_11, Deps_0_10, Deps_0_9, Deps_0_7).map(x => x.millPlatform -> x)
@@ -75,12 +75,12 @@ trait MillKotlinModule extends PublishModule with ScoverageModule with Cross.Mod
   override def artifactSuffix: T[String] = s"_mill${millPlatform}_${artifactScalaVersion()}"
 
   override def javacOptions = Seq("-source", "1.8", "-target", "1.8", "-encoding", "UTF-8")
-  override def scalacOptions = Seq("-target:jvm-1.8", "-encoding", "UTF-8")
+  override def scalacOptions = Seq("-target:jvm-1.8", "-encoding", "UTF-8", "-deprecation")
   override def scoverageVersion = deps.scoverageVersion
 
   def pomSettings = T {
     PomSettings(
-      description = "Kotlin compiler support for mill",
+      description = "Kotlin compiler support for Mill",
       organization = "de.tototec",
       url = "https://github.com/lefou/mill-kotlin",
       licenses = Seq(License.`Apache-2.0`),
@@ -92,46 +92,20 @@ trait MillKotlinModule extends PublishModule with ScoverageModule with Cross.Mod
   override def skipIdea: Boolean = millApiVersions.head._2.millPlatform != millPlatform
 }
 
-object api extends Cross[ApiCross](millApiVersions.map(_._1))
-trait ApiCross extends MillKotlinModule {
-  override def artifactName = T { "de.tobiasroeser.mill.kotlin-api" }
-  override def compileIvyDeps: T[Loose.Agg[Dep]] = T {
-    Agg(
-      deps.millMainApi,
-      deps.osLib
-    )
-  }
-}
-
-object worker extends Cross[WorkerCross](millApiVersions.map(_._1))
-trait WorkerCross extends MillKotlinModule {
-  override def artifactName = T { "de.tobiasroeser.mill.kotlin-worker" }
-  override def moduleDeps: Seq[PublishModule] = Seq(api(millPlatform))
-  override def compileIvyDeps: T[Loose.Agg[Dep]] = T {
-    Agg(
-      deps.osLib,
-      deps.millMainApi,
-      deps.kotlinCompiler
-    )
-  }
-}
-
 object main extends Cross[MainCross](millApiVersions.map(_._1))
 trait MainCross extends MillKotlinModule {
-  override def artifactName = T { "de.tobiasroeser.mill.kotlin" }
-  override def moduleDeps: Seq[PublishModule] = Seq(api(millPlatform))
-  override def ivyDeps = T {
-    Agg(ivy"${scalaOrganization()}:scala-library:${scalaVersion()}")
-  }
+  override def artifactName = "de.tobiasroeser.mill.kotlin"
+  override def moduleDeps: Seq[PublishModule] = Seq(worker)
+  override def ivyDeps =  Agg(
+    ivy"${scalaOrganization()}:scala-library:${scalaVersion()}")
   override def sources = T.sources {
     val suffixes =
       ZincWorkerUtil.matchingVersions(millPlatform) ++
-      ZincWorkerUtil.versionRanges(millPlatform, millApiVersions.map(_._1))
+        ZincWorkerUtil.versionRanges(millPlatform, millApiVersions.map(_._1))
 
     PathRef(millSourcePath / s"src") +:
       suffixes.map(v => PathRef(millSourcePath / ("src-" + v)))
   }
-
 
   override def compileIvyDeps = Agg(
     deps.millMain,
@@ -162,9 +136,7 @@ trait MainCross extends MillKotlinModule {
          |  /** The mill API version used to build mill-kotlin. */
          |  val buildTimeMillVersion = "${deps.millVersion}"
          |  /** The ivy dependency holding the mill kotlin worker impl. */
-         |  val millKotlinWorkerImplIvyDep = "${worker(millPlatform).pomSettings().organization}:${worker(
-        millPlatform
-      ).artifactId()}:${worker(millPlatform).publishVersion()}"
+         |  val millKotlinWorkerImplIvyDep = "${worker.impl.pomSettings().organization}:${worker.impl.artifactId()}:${worker.impl.publishVersion()}"
          |  /** The default kotlin version used for the compiler. */
          |  val kotlinCompilerVersion = "${deps.kotlinVersion}"
          |}
@@ -174,13 +146,26 @@ trait MainCross extends MillKotlinModule {
     PathRef(dest)
   }
 
+  object worker extends MillKotlinModule with CrossValue {
+    override def artifactName = "de.tobiasroeser.mill.kotlin.worker"
+    override def compileIvyDeps: T[Agg[Dep]] = Agg(
+      deps.millMainApi,
+      deps.osLib
+    )
+
+    object impl extends MillKotlinModule with CrossValue {
+      override def artifactName = "de.tobiasroeser.mill.kotlin.worker.impl"
+      override def moduleDeps: Seq[PublishModule] = Seq(worker)
+      override def compileIvyDeps: T[Agg[Dep]] = Agg(
+        deps.osLib,
+        deps.millMainApi,
+        deps.kotlinCompiler
+      )
+    }
+  }
 }
 
-object itest extends Cross[ItestCross](millItestVersions.map(_._1)) with TaskModule {
-  override def defaultCommandName(): String = "test"
-  def testCached: T[Seq[TestCase]] = itest(millItestVersions.map(_._1).head).testCached
-  def test(args: String*): Command[Seq[TestCase]] = itest(millItestVersions.map(_._1).head).test()
-}
+object itest extends Cross[ItestCross](millItestVersions.map(_._1))
 trait ItestCross extends MillIntegrationTestModule with Cross.Module[String] {
   def millItestVersion = crossValue
   val millPlatform = millItestVersions.toMap.apply(millItestVersion).millPlatform
@@ -188,7 +173,7 @@ trait ItestCross extends MillIntegrationTestModule with Cross.Module[String] {
 
   override def millTestVersion = millItestVersion
   override def pluginsUnderTest = Seq(main(millPlatform))
-  override def temporaryIvyModules = Seq(api(millPlatform), worker(millPlatform))
+  override def temporaryIvyModules = Seq(main(millPlatform).worker, main(millPlatform).worker.impl)
   override def testTargets: T[Seq[String]] = T { Seq("-d", "verify") }
 
   override def testCases: T[Seq[PathRef]] = T {
@@ -200,8 +185,7 @@ trait ItestCross extends MillIntegrationTestModule with Cross.Module[String] {
     }
   }
 
-  override def temporaryIvyModulesDetails
-      : Task[Seq[(PathRef, (PathRef, (PathRef, (PathRef, (PathRef, Artifact)))))]] =
+  override def temporaryIvyModulesDetails: Task[Seq[(PathRef, (PathRef, (PathRef, (PathRef, (PathRef, Artifact)))))]] =
     Target.traverse(temporaryIvyModules) { p =>
       val jar = p match {
         case p: ScoverageModule => p.scoverage.jar
