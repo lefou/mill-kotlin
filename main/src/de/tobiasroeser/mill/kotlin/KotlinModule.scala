@@ -147,7 +147,7 @@ trait KotlinModule extends JavaModule with KotlinModulePlatform { outer =>
 
     def compileJava: Result[CompilationResult] = {
       ctx.log.info(
-        s"Compiling ${javaSourceFiles.size} sources to ${classes} ..."
+        s"Compiling ${javaSourceFiles.size} Java sources to ${classes} ..."
       )
       // The compile step is lazy, but it's dependencies are not!
       internalCompileJavaFiles(
@@ -163,7 +163,7 @@ trait KotlinModule extends JavaModule with KotlinModulePlatform { outer =>
 
     if (isMixed || isKotlin) {
       ctx.log.info(
-        s"Compiling ${kotlinSourceFiles.size} sources to ${classes} ..."
+        s"Compiling ${kotlinSourceFiles.size} Kotlin sources to ${classes} ..."
       )
       val compilerArgs: Seq[String] = Seq(
         // destdir
