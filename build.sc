@@ -74,8 +74,14 @@ trait MillKotlinModule extends PublishModule with ScoverageModule with Cross.Mod
   override def publishVersion: T[String] = VcsVersion.vcsState().format()
   override def artifactSuffix: T[String] = s"_mill${millPlatform}_${artifactScalaVersion()}"
 
-  override def javacOptions = Seq("-source", "1.8", "-target", "1.8", "-encoding", "UTF-8")
+  override def javacOptions = {
+    val release =
+      if (scala.util.Properties.isJavaAtLeast(11)) Seq("-release", "8")
+      else Seq("-source", "1.8", "-target", "1.8")
+    release ++ Seq("-encoding", "UTF-8", "-deprecation")
+  }
   override def scalacOptions = Seq("-target:jvm-1.8", "-encoding", "UTF-8", "-deprecation")
+
   override def scoverageVersion = deps.scoverageVersion
 
   def pomSettings = T {
@@ -96,8 +102,9 @@ object main extends Cross[MainCross](millApiVersions.map(_._1))
 trait MainCross extends MillKotlinModule {
   override def artifactName = "de.tobiasroeser.mill.kotlin"
   override def moduleDeps: Seq[PublishModule] = Seq(worker)
-  override def ivyDeps =  Agg(
-    ivy"${scalaOrganization()}:scala-library:${scalaVersion()}")
+  override def ivyDeps = Agg(
+    ivy"${scalaOrganization()}:scala-library:${scalaVersion()}"
+  )
   override def sources = T.sources {
     val suffixes =
       ZincWorkerUtil.matchingVersions(millPlatform) ++
