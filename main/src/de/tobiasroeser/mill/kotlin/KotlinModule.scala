@@ -142,15 +142,13 @@ trait KotlinModule extends JavaModule with KotlinModulePlatform { outer =>
     val isJava = javaSourceFiles.nonEmpty
     val isMixed = isKotlin && isJava
 
-    val counts = Seq("Kotlin" -> kotlinSourceFiles.size, "Java" -> javaSourceFiles.size)
-    ctx.log.info(
-      s"Compiling ${counts.filter(_._2 > 0).map { case (n, c) => s"$c $n" }.mkString(" and ")} sources to ${classes} ..."
-    )
-
     val compileCp = compileClasspath().map(_.path).filter(os.exists)
     val updateCompileOutput = upstreamCompileOutput()
 
     def compileJava: Result[CompilationResult] = {
+      ctx.log.info(
+        s"Compiling ${javaSourceFiles.size} Java sources to ${classes} ..."
+      )
       // The compile step is lazy, but it's dependencies are not!
       internalCompileJavaFiles(
         worker = zincWorkerRef().worker(),
@@ -164,6 +162,9 @@ trait KotlinModule extends JavaModule with KotlinModulePlatform { outer =>
     }
 
     if (isMixed || isKotlin) {
+      ctx.log.info(
+        s"Compiling ${kotlinSourceFiles.size} Kotlin sources to ${classes} ..."
+      )
       val compilerArgs: Seq[String] = Seq(
         // destdir
         Seq("-d", classes.toIO.getAbsolutePath()),
