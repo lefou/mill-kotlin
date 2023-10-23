@@ -1,11 +1,9 @@
 = mill-kotlin - Kotlin compiler support for mill
-:version: 0.2.3
+:version: 0.2.4
 :mill-platform: 0.11
-:kotlinVersion: 1.8.22
+:kotlinVersion: 1.9.10
 :projectHome: https://github.com/lefou/mill-kotlin
 :min-mill-version: 0.7.0
-:toc:
-:toc-placement: preamble
 
 ifdef::env-github[]
 image:https://github.com/lefou/mill-kotlin/workflows/.github/workflows/build.yml/badge.svg["Build Status (GitHub Actions)", link="https://github.com/lefou/mill-kotlin/actions"]
@@ -92,6 +90,8 @@ The following table shows a matrix of compatible mill and mill-kotlin versions.
 [options="header"]
 |===
 | mill-kotlin | mill
+| 0.2.4 | 0.7.0 - 0.11.x
+| 0.2.3 | 0.7.0 - 0.11.x
 | 0.2.2 | 0.6.0 - 0.10.x
 | 0.2.1 | 0.6.0 - 0.9.x
 | 0.2.0 | 0.6.0 - 0.9.x
@@ -117,7 +117,9 @@ Please make sure to use the correct _mill platform suffix_ matching your used mi
 [options="header"]
 |===
 | mill version  | mill platform | suffix | example
-| 0.10.x        | 0.10 | `_mill0.10` | ```$ivy.`de.tototec::de.tobiasroeser.mill.kotlin::{version}````
+| 0.11.x        | 0.11 | `_mill0.11` | ```$ivy.`de.tototec::de.tobiasroeser.mill.kotlin::{version}````
+| 0.10.x        | 0.10 | `_mill0.10` | ```$ivy.`de.tototec::de.tobiasroeser
+.mill.kotlin::{version}````
 | 0.9.3 -       | 0.9  | `_mill0.9`  | ```$ivy.`de.tototec::de.tobiasroeser.mill.kotlin_mill0.9:{version}````
 | 0.7.0 - 0.8.0 | 0.7  | `_mill0.7`  | ```$ivy.`de.tototec::de.tobiasroeser.mill.kotlin_mill0.7:{version}````
 |===
@@ -152,6 +154,23 @@ Contributing::
   I also accept {projectHome}/pulls[pull requests on GitHub].
 
 == Changelog
+
+
+=== 0.2.4 - 2023-10-23
+:version: 0.2.4
+:prev-version: 0.2.3
+:github-milestone: 7
+
+* Internal improvements and dependency updates
+
+_See
+ifeval::["{github-milestone}" != ""]
+https://github.com/lefou/mill-kotlin/milestone/{github-milestone}?closed=1[milstone {version}]
+and the
+endif::[]
+https://github.com/lefou/mill-kotlin/compare/{prev-version}\...{version}[list of commits]_
+
+
 
 === 0.2.3 - 2023-06-12
 :version: 0.2.3
