@@ -25,13 +25,13 @@ trait KotlinModulePlatform extends JavaModule {
   }
 
   private[kotlin] def internalCompileJavaFiles(
-    worker: ZincWorkerApi,
-    upstreamCompileOutput: Seq[CompilationResult],
-    javaSourceFiles: Seq[os.Path],
-    compileCp: Agg[os.Path],
-    javacOptions: Seq[String],
-    compileProblemReporter: Option[CompileProblemReporter],
-    reportOldProblems: Boolean
+      worker: ZincWorkerApi,
+      upstreamCompileOutput: Seq[CompilationResult],
+      javaSourceFiles: Seq[os.Path],
+      compileCp: Agg[os.Path],
+      javacOptions: Seq[String],
+      compileProblemReporter: Option[CompileProblemReporter],
+      reportOldProblems: Boolean
   )(implicit ctx: ZincWorkerApi.Ctx): Result[CompilationResult] = {
     worker.compileJava(
       upstreamCompileOutput = upstreamCompileOutput,
