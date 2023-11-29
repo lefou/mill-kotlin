@@ -87,25 +87,13 @@ trait KotlinModule extends JavaModule with KotlinModulePlatform { outer =>
 //    ivy"org.jetbrains.kotlin:kotlin-scripting-common:${kotlinCompilerVersion()}",
   }
 
-  def kotlinWorker: Worker[KotlinWorker] = T.worker {
-    val cl = new URLClassLoader(
-      kotlinCompilerClasspath().map(_.path.toIO.toURI().toURL()).toArray[URL],
-      getClass().getClassLoader()
-    )
-    val className =
-      classOf[KotlinWorker].getPackage().getName() + ".impl." + classOf[KotlinWorker].getSimpleName() + "Impl"
-    val impl = cl.loadClass(className)
-    val worker = impl.newInstance().asInstanceOf[KotlinWorker]
-    if (worker.getClass().getClassLoader() != cl) {
-      T.ctx().log.error(
-        """Worker not loaded from worker classloader.
-          |You should not add the mill-kotlin-worker JAR to the mill build classpath""".stripMargin
-      )
-    }
-    if (worker.getClass().getClassLoader() == classOf[KotlinWorker].getClassLoader()) {
-      T.ctx().log.error("Worker classloader used to load interface and implementation")
-    }
-    worker
+//  @Deprecated("Use kotlinWorkerTask instead, as this does not need to be cached as Worker")
+//  def kotlinWorker: Worker[KotlinWorker] = T.worker {
+//    kotlinWorkerTask()
+//  }
+
+  def kotlinWorkerTask: Task[KotlinWorker] = T.task {
+    kotlinWorkerRef().kotlinWorkerManager().get(kotlinCompilerClasspath())
   }
 
   /**
@@ -176,7 +164,7 @@ trait KotlinModule extends JavaModule with KotlinModulePlatform { outer =>
         (kotlinSourceFiles ++ javaSourceFiles).map(_.toIO.getAbsolutePath())
       ).flatten
 
-      val workerResult = kotlinWorker().compile(compilerArgs: _*)
+      val workerResult = kotlinWorkerTask().compile(compilerArgs: _*)
 
       val analysisFile = dest / "kotlin.analysis.dummy"
       os.write(target = analysisFile, data = "", createFolders = true)
