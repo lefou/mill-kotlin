@@ -23,9 +23,9 @@ jobs:
         targets:
           - __.publishLocal $(pwd)/testRepo
           - "main[_].__.test"
+          - "itest[0.11.6].test"
           - "itest[0.11.0].test"
-          - "itest[0.10.11].test"
-          - "itest[0.10.3].test"
+          - "itest[0.10.13].test"
           - "itest[0.10.0].test"
           - "itest[0.9.12].test"
           - "itest[0.9.3].test"
