@@ -80,7 +80,7 @@ trait MillKotlinModule extends PublishModule with ScoverageModule with Cross.Mod
       else Seq("-source", "1.8", "-target", "1.8")
     release ++ Seq("-encoding", "UTF-8", "-deprecation")
   }
-  override def scalacOptions = Seq("-target:jvm-1.8", "-encoding", "UTF-8", "-deprecation")
+  override def scalacOptions = Seq("-release:8", "-encoding", "UTF-8", "-deprecation")
 
   override def scoverageVersion = deps.scoverageVersion
 

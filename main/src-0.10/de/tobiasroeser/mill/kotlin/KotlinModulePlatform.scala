@@ -14,6 +14,8 @@ trait KotlinModulePlatform extends JavaModule {
   protected type ModuleRef[T] = Function0[T]
   protected def zincWorkerRef: ModuleRef[ZincWorkerModule] = () => zincWorker
 
+  protected def kotlinWorkerRef: ModuleRef[KotlinWorkerModule] = () => KotlinWorkerModule
+
   def kotlinCompilerIvyDeps: T[Agg[Dep]]
 
   /**
