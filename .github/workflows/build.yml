@@ -23,7 +23,7 @@ jobs:
         targets:
           - __.publishLocal $(pwd)/testRepo
           - "main[_].__.test"
-          - "itest[0.11.6].test"
+          - "itest[0.11.8].test"
           - "itest[0.11.0].test"
           - "itest[0.10.13].test"
           - "itest[0.10.0].test"
@@ -52,7 +52,7 @@ jobs:
       - name: Upload scoverage reports to codecov.io
         uses: codecov/codecov-action@v4
         with:
-          files: ./out/api/0.11/scoverage/xmlReport.dest/scoverage.xml,./out/api/0.10/scoverage/xmlReport.dest/scoverage.xml,./out/api/0.9/scoverage/xmlReport.dest/scoverage.xml,./out/api/0.7/scoverage/xmlReport.dest/scoverage.xml,./out/worker/0.11/scoverage/xmlReport.dest/scoverage.xml,./out/worker/0.10/scoverage/xmlReport.dest/scoverage.xml,./out/worker/0.9/scoverage/xmlReport.dest/scoverage.xml,./out/worker/0.7/scoverage/xmlReport.dest/scoverage.xml,./out/main/0.11.0/scoverage/xmlReport.dest/scoverage.xml,./out/main/0.10/scoverage/xmlReport.dest/scoverage.xml,./out/main/0.9/scoverage/xmlReport.dest/scoverage.xml,./out/main/0.7/scoverage/xmlReport.dest/scoverage.xml
+          files: ./out/api/0.11/scoverage/xmlReport.dest/scoverage.xml,./out/api/0.10/scoverage/xmlReport.dest/scoverage.xml,./out/api/0.9/scoverage/xmlReport.dest/scoverage.xml,./out/api/0.7/scoverage/xmlReport.dest/scoverage.xml,./out/worker/0.11/scoverage/xmlReport.dest/scoverage.xml,./out/worker/0.10/scoverage/xmlReport.dest/scoverage.xml,./out/worker/0.9/scoverage/xmlReport.dest/scoverage.xml,./out/worker/0.7/scoverage/xmlReport.dest/scoverage.xml,./out/main/0.11/scoverage/xmlReport.dest/scoverage.xml,./out/main/0.10/scoverage/xmlReport.dest/scoverage.xml,./out/main/0.9/scoverage/xmlReport.dest/scoverage.xml,./out/main/0.7/scoverage/xmlReport.dest/scoverage.xml
           token: ${{ secrets.CODECOV_TOKEN }}
         continue-on-error: true
 
